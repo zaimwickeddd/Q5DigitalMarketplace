@@ -11,43 +11,43 @@ import java.util.List;
 
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ViewHolder> {
 
-    private List<Listing> listingsList;
+    private final List<Listing> itemsList;
 
-    public ListingAdapter(List<Listing> listingsList) {
-        this.listingsList = listingsList;
+    public ListingAdapter(List<Listing> itemsList) {
+        this.itemsList = itemsList;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_listing_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_marketplace_card, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Listing item = listingsList.get(position);
-        holder.title.setText(item.getTitle());
-        holder.price.setText(item.getPrice());
-        holder.category.setText(item.getCategory() + " • " + item.getCondition());
-        holder.imageView.setImageResource(item.getImageResourceId());
+        Listing listing = itemsList.get(position);
+        holder.tvTitle.setText(listing.getTitle());
+        holder.tvPrice.setText(listing.getCardPrice());
+        holder.tvTag.setText(listing.getCategory() + " • " + listing.getCondition());
+        holder.imgPreview.setImageResource(listing.getImageResourceId());
     }
 
     @Override
     public int getItemCount() {
-        return listingsList.size();
+        return itemsList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageView;
-        TextView title, price, category;
+        ImageView imgPreview;
+        TextView tvTitle, tvTag, tvPrice;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            imageView = itemView.findViewById(R.id.img_item);
-            title = itemView.findViewById(R.id.txt_title);
-            price = itemView.findViewById(R.id.txt_price);
-            category = itemView.findViewById(R.id.txt_category);
+            imgPreview = itemView.findViewById(R.id.img_item_preview);
+            tvTitle = itemView.findViewById(R.id.tv_item_title);
+            tvTag = itemView.findViewById(R.id.tv_item_tag);
+            tvPrice = itemView.findViewById(R.id.tv_item_price);
         }
     }
 }
