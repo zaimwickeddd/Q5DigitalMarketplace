@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 9; // Bumped to 9 for a fresh start
+    private static final int DATABASE_VERSION = 9;
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";
