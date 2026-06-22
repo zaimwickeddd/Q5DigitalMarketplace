@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Q5DigitalMarketplace</string>
+    <string name="nav_explore">Explore</string>
+    <string name="nav_sell">Sell</string>
+    <string name="nav_favourites">Favourites</string>
+    <string name="nav_profile">Profile</string>
+    <string name="welcome_title">Q5 Marketplace</string>
+    <string name="search_hint">Search items on campus...</string>
+    <string name="filter_all">All Items</string>
+    <string name="filter_books">Books</string>
+    <string name="filter_electronics">Electronics</string>
+    <string name="filter_clothes">Clothes</string>
 </resources>
