@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_favourites) {
                 // selectedFragment = new FavouritesFragment();
             } else if (itemId == R.id.nav_profile) {
-                // selectedFragment = new ProfileDashboardFragment();
+                 selectedFragment = new ProfileDashboardFragment();
             }
 
             if (selectedFragment != null) {

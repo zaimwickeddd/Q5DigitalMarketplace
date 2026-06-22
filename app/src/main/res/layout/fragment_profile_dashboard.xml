@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F9FC"
+    android:padding="16dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_profile_pic_container"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/img_profile_avatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@android:drawable/ic_menu_report_image"
+            android:scaleType="centerCrop"
+            android:contentDescription="User Avatar" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tv_profile_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:text="Student Name"
+        android:textColor="#1A1C1E"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="@id/cv_profile_pic_container"
+        app:layout_constraintBottom_toTopOf="@id/tv_profile_email"
+        app:layout_constraintStart_toEndOf="@id/cv_profile_pic_container" />
+
+    <TextView
+        android:id="@+id/tv_profile_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="student@email.com"
+        android:textColor="#74777F"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tv_profile_name"
+        app:layout_constraintBottom_toBottomOf="@id/cv_profile_pic_container" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_counters_container"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="24dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:cardBackgroundColor="#EDF1F9"
+        app:layout_constraintTop_toBottomOf="@id/cv_profile_pic_container">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/tv_count_listings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#0061A4"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Listings"
+                    android:textColor="#44474F"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+                <TextView
+                    android:id="@+id/tv_count_favourites"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#0061A4"
+                    android:textSize="20sp"
+                    android:textStyle="bold"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Favourites"
+                    android:textColor="#44474F"
+                    android:textSize="12sp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tv_lbl_analytics"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Report &amp; Analytics"
+        android:textStyle="bold"
+        android:textColor="#1A1C1E"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/cv_counters_container"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_analytics_row"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="1dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_lbl_analytics">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="16dp">
+            <ImageView
+                android:id="@+id/icon_analytics"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:src="@android:drawable/ic_menu_sort_by_size"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/icon_analytics"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="12dp"
+                android:text="Report &amp; Analytics"
+                android:textStyle="bold"
+                android:textColor="#1A1C1E"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/icon_analytics"
+                android:layout_marginStart="12dp"
+                android:layout_marginBottom="12dp"
+                android:text="Gain insights into your shop's activity"
+                android:textColor="#74777F"
+                android:textSize="11sp"/>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:src="@android:drawable/ic_media_next"/>
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/tv_lbl_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="My Account"
+        android:textStyle="bold"
+        android:textColor="#1A1C1E"
+        android:textSize="15sp"
+        app:layout_constraintTop_toBottomOf="@id/cv_analytics_row"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv_menu_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="1dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_lbl_account">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingVertical="8dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingHorizontal="16dp">
+                <ImageView android:id="@+id/i1" android:layout_width="24dp" android:layout_height="24dp" android:layout_centerVertical="true" android:src="@android:drawable/ic_menu_agenda"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i1" android:layout_marginStart="12dp" android:layout_marginTop="6dp" android:text="My Listings" android:textStyle="bold" android:textColor="#1A1C1E"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i1" android:layout_marginStart="12dp" android:layout_alignParentBottom="true" android:layout_marginBottom="6dp" android:text="Manage your listing" android:textColor="#74777F" android:textSize="11sp"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next"/>
+            </RelativeLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E2EC" android:layout_marginVertical="4dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingHorizontal="16dp">
+                <ImageView android:id="@+id/i2" android:layout_width="24dp" android:layout_height="24dp" android:layout_centerVertical="true" android:src="@android:drawable/btn_star_big_on"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i2" android:layout_marginStart="12dp" android:layout_marginTop="6dp" android:text="My Favourites" android:textStyle="bold" android:textColor="#1A1C1E"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i2" android:layout_marginStart="12dp" android:layout_alignParentBottom="true" android:layout_marginBottom="6dp" android:text="Check your saved items" android:textColor="#74777F" android:textSize="11sp"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next"/>
+            </RelativeLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E2EC" android:layout_marginVertical="4dp"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:paddingHorizontal="16dp">
+                <ImageView android:id="@+id/i3" android:layout_width="24dp" android:layout_height="24dp" android:layout_centerVertical="true" android:src="@android:drawable/ic_menu_preferences"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i3" android:layout_marginStart="12dp" android:layout_marginTop="6dp" android:text="Account Setting" android:textStyle="bold" android:textColor="#1A1C1E"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_toEndOf="@id/i3" android:layout_marginStart="12dp" android:layout_alignParentBottom="true" android:layout_marginBottom="6dp" android:text="Profile, security and preferences" android:textColor="#74777F" android:textSize="11sp"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:layout_alignParentEnd="true" android:layout_centerVertical="true" android:src="@android:drawable/ic_media_next"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <Button
+        android:id="@+id/btn_sign_out"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="24dp"
+        android:text="→  Sign Out"
+        android:textColor="#BA1A1A"
+        android:textStyle="bold"
+        android:backgroundTint="#FFFFFF"
+        app:strokeColor="#BA1A1A"
+        app:strokeWidth="1dp"
+        app:layout_constraintTop_toBottomOf="@id/cv_menu_container" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Q5 Digital Marketplace v0.1"
+        android:textColor="#74777F"
+        android:textSize="11sp"
+        app:layout_constraintTop_toBottomOf="@id/btn_sign_out"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
