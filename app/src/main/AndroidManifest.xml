@@ -11,6 +11,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Q5DigitalMarketplace">
+
         <activity
             android:name=".SplashActivity"
             android:exported="true">
@@ -25,12 +26,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="true" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="false" />
+
         <activity
-            android:name=".SignupActivity"
-            android:exported="false" />
+            android:name=".MainActivity"
+            android:exported="true" />
+
     </application>
 
 </manifest>

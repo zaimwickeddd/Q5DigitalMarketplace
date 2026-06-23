@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
 
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,6 +20,11 @@ public class SplashActivity extends AppCompatActivity {
             Intent intent = new Intent(SplashActivity.this, WelcomeActivity.class);
             startActivity(intent);
             finish();
+        new Handler().postDelayed(() -> {
+            // After 2 seconds, go to Login screen
+            Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish(); // Close splash activity so user can't go back to it
         }, 2000);
     }
 }
