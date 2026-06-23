@@ -3,6 +3,11 @@ package com.example.q5digitalmarketplace;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class SplashActivity extends AppCompatActivity {
+
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
@@ -11,6 +16,10 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            Intent intent = new Intent(SplashActivity.this, WelcomeActivity.class);
+            startActivity(intent);
+            finish();
         new Handler().postDelayed(() -> {
             // After 2 seconds, go to Login screen
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);

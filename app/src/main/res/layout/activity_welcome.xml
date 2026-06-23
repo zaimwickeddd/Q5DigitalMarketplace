@@ -5,7 +5,6 @@
     android:layout_height="match_parent"
     android:background="#102A43">
 
-    <!-- Background Illustration/Logo area -->
     <ImageView
         android:id="@+id/ivBackground"
         android:layout_width="match_parent"
