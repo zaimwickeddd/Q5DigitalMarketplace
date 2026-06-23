@@ -12,6 +12,9 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
+    private static final int DATABASE_VERSION = 2; // Incremented version to force database update
+
+    // Table and Column names for Listings
     private static final int DATABASE_VERSION = 9;
 
     public static final String TABLE_LISTINGS = "listings";
@@ -34,6 +37,52 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        // 1. Create Listings Table
+        String CREATE_LISTINGS_TABLE = "CREATE TABLE " + TABLE_LISTINGS + "("
+                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COLUMN_TITLE + " TEXT,"
+                + COLUMN_PRICE + " TEXT,"
+                + COLUMN_CATEGORY + " TEXT,"
+                + COLUMN_CONDITION + " TEXT,"
+                + COLUMN_IMAGE_RES + " INTEGER" + ")";
+        db.execSQL(CREATE_LISTINGS_TABLE);
+
+        // 2. Create Student Table
+        String CREATE_STUDENT_TABLE = "CREATE TABLE Student ("
+                + "StuID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "Name TEXT, "
+                + "Email TEXT, "
+                + "PhoneNum TEXT, "
+                + "UserType TEXT);";
+        db.execSQL(CREATE_STUDENT_TABLE);
+
+        // 3. Create Buyer Table
+        String CREATE_BUYER_TABLE = "CREATE TABLE Buyer ("
+                + "BuyerID INTEGER PRIMARY KEY, "
+                + "BuyerBio TEXT, "
+                + "Date_Joined TEXT, "
+                + "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));";
+        db.execSQL(CREATE_BUYER_TABLE);
+
+        // 4. Create Seller Table
+        String CREATE_SELLER_TABLE = "CREATE TABLE Seller ("
+                + "SellerID INTEGER PRIMARY KEY, "
+                + "StoreBio TEXT, "
+                + "FOREIGN KEY(SellerID) REFERENCES Student(StuID));";
+        db.execSQL(CREATE_SELLER_TABLE);
+
+        // 5. Create Wishlist Table
+        String CREATE_WISHLIST_TABLE = "CREATE TABLE Wishlist ("
+                + "WishListID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "Date_Added TEXT, "
+                + "BuyerID INTEGER, "
+                + "ItemID INTEGER, "
+                + "FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), "
+                + "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));";
+        db.execSQL(CREATE_WISHLIST_TABLE);
+
+        // Pre-populate your own profile into Student table so your Profile tab has active data
+        db.execSQL("INSERT INTO Student (Name, Email, PhoneNum, UserType) VALUES ('Awang Najib', 'najib123@gmail.com', '0123456789', 'B');");
         try {
             db.execSQL("CREATE TABLE " + TABLE_LISTINGS + "("
                     + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -57,6 +106,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
+        db.execSQL("DROP TABLE IF EXISTS Wishlist");
+        db.execSQL("DROP TABLE IF EXISTS Seller");
+        db.execSQL("DROP TABLE IF EXISTS Buyer");
+        db.execSQL("DROP TABLE IF EXISTS Student");
+        onCreate(db);
+    }
+
+    // --- EXISTING LISTING METHODS ---
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         onCreate(db);
     }
@@ -137,5 +194,41 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
         return list;
+    }
+
+    // --- WISHLIST & PROFILE PROFILE QUERIES ---
+
+    public boolean insertWishlist(int buyerId, int itemId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("BuyerID", buyerId);
+        values.put("ItemID", itemId);
+        values.put("Date_Added", "2026-06-22"); // Tracks current project simulation date
+        long result = db.insert("Wishlist", null, values);
+        db.close();
+        return result != -1;
+    }
+
+    public Cursor getStudentProfile(int stuId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT Name, Email FROM Student WHERE StuID = ?", new String[]{String.valueOf(stuId)});
+    }
+
+    public int getListingsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS, null);
+        int count = 0;
+        if (cursor.moveToFirst()) { count = cursor.getInt(0); }
+        cursor.close();
+        return count;
+    }
+
+    public int getWishlistCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Wishlist", null);
+        int count = 0;
+        if (cursor.moveToFirst()) { count = cursor.getInt(0); }
+        cursor.close();
+        return count;
     }
 }

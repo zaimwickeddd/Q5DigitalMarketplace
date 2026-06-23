@@ -18,6 +18,10 @@ public class Listing {
     // Getters
     public String getTitle() { return title; }
     public String getPrice() { return price; }
+
+    // Added this method to fix the ListingAdapter compilation error
+    public String getCardPrice() { return price; }
+
     public String getCategory() { return category; }
     public String getCondition() { return condition; }
     public int getImageResourceId() { return imageResourceId; }
