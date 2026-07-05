@@ -38,9 +38,10 @@ public class SignupActivity extends AppCompatActivity {
                 boolean success = dbHelper.addUser(username, email, password);
                 if (success) {
                     Toast.makeText(SignupActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                    // Clean navigation back to Login screen to populate credentials natively
                     finish();
                 } else {
-                    Toast.makeText(SignupActivity.this, "Registration Failed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignupActivity.this, "Registration Failed or Email Already Taken", Toast.LENGTH_SHORT).show();
                 }
             }
         });

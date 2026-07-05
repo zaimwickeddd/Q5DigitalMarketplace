@@ -12,7 +12,6 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    // Bumped to version 11 to update schema for dynamic text paths and custom descriptions
     private static final int DATABASE_VERSION = 11;
 
     public static final String TABLE_LISTINGS = "listings";
@@ -21,8 +20,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_CONDITION = "condition";
-    public static final String COLUMN_IMAGE_RES = "image_resource_id"; // Now holds TEXT path URIs
-    public static final String COLUMN_DESCRIPTION = "description"; // Dedicated new column
+    public static final String COLUMN_IMAGE_RES = "image_resource_id";
+    public static final String COLUMN_DESCRIPTION = "description";
 
     public static final String TABLE_USERS = "users";
     public static final String COLUMN_USER_ID = "user_id";
@@ -37,18 +36,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         try {
-            // 1. Create Listings Table with Updated Data Types
             String CREATE_LISTINGS_TABLE = "CREATE TABLE " + TABLE_LISTINGS + "("
                     + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_TITLE + " TEXT,"
                     + COLUMN_PRICE + " TEXT,"
                     + COLUMN_CATEGORY + " TEXT,"
                     + COLUMN_CONDITION + " TEXT,"
-                    + COLUMN_IMAGE_RES + " TEXT," // Changed to TEXT to store image paths from gallery
+                    + COLUMN_IMAGE_RES + " TEXT,"
                     + COLUMN_DESCRIPTION + " TEXT" + ")";
             db.execSQL(CREATE_LISTINGS_TABLE);
 
-            // 2. Create Student Table
             String CREATE_STUDENT_TABLE = "CREATE TABLE Student ("
                     + "StuID INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "Name TEXT, "
@@ -57,7 +54,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "UserType TEXT);";
             db.execSQL(CREATE_STUDENT_TABLE);
 
-            // 3. Create Buyer Table
             String CREATE_BUYER_TABLE = "CREATE TABLE Buyer ("
                     + "BuyerID INTEGER PRIMARY KEY, "
                     + "BuyerBio TEXT, "
@@ -65,14 +61,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));";
             db.execSQL(CREATE_BUYER_TABLE);
 
-            // 4. Create Seller Table
             String CREATE_SELLER_TABLE = "CREATE TABLE Seller ("
                     + "SellerID INTEGER PRIMARY KEY, "
                     + "StoreBio TEXT, "
                     + "FOREIGN KEY(SellerID) REFERENCES Student(StuID));";
             db.execSQL(CREATE_SELLER_TABLE);
 
-            // 5. Create Wishlist Table
             String CREATE_WISHLIST_TABLE = "CREATE TABLE Wishlist ("
                     + "WishListID INTEGER PRIMARY KEY AUTOINCREMENT, "
                     + "Date_Added TEXT, "
@@ -82,7 +76,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));";
             db.execSQL(CREATE_WISHLIST_TABLE);
 
-            // 6. Create Users Table (for Authentication)
             String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + "("
                     + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_USERNAME + " TEXT,"
@@ -90,8 +83,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + COLUMN_USER_PASSWORD + " TEXT" + ")";
             db.execSQL(CREATE_USERS_TABLE);
 
-            // Pre-populate profile
+            // Pre-populate sample profile and your test credentials inside authentication table
             db.execSQL("INSERT INTO Student (Name, Email, PhoneNum, UserType) VALUES ('Awang Najib', 'najib123@gmail.com', '0123456789', 'B');");
+            db.execSQL("INSERT INTO " + TABLE_USERS + " (" + COLUMN_USERNAME + ", " + COLUMN_USER_EMAIL + ", " + COLUMN_USER_PASSWORD + ") VALUES ('Zaim', 'zaim@gmail.com', 'zaim123');");
 
             Log.d("DatabaseHelper", "Tables created successfully with upgraded schema attributes");
         } catch (Exception e) {
@@ -146,6 +140,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return isValid;
     }
 
+    public String getUserNameByEmail(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String username = "User";
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_USERS, new String[]{COLUMN_USERNAME},
+                    COLUMN_USER_EMAIL + "=?", new String[]{email},
+                    null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                username = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USERNAME));
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseHelper", "Error fetching username", e);
+        } finally {
+            if (cursor != null) cursor.close();
+            db.close();
+        }
+        return username;
+    }
+
     public void insertListing(Listing listing) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -153,8 +167,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PRICE, listing.getPrice());
         values.put(COLUMN_CATEGORY, listing.getCategory());
         values.put(COLUMN_CONDITION, listing.getCondition());
-        values.put(COLUMN_IMAGE_RES, listing.getImagePath()); // Inserts the String path URL natively
-        values.put(COLUMN_DESCRIPTION, listing.getDescription()); // Direct description text column mapping
+        values.put(COLUMN_IMAGE_RES, listing.getImagePath());
+        values.put(COLUMN_DESCRIPTION, listing.getDescription());
 
         try {
             db.insert(TABLE_LISTINGS, null, values);
@@ -178,8 +192,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)),
-                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)), // Reads String text out cleanly
-                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)) // Extracts clean description field
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION))
                     ));
                 } while (cursor.moveToNext());
             }

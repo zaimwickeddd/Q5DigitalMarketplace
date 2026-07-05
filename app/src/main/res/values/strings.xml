@@ -16,4 +16,13 @@
     <string name="error_missing_fields">Please fill in all required fields</string>
     <string name="success_listing_added">Listing added successfully!</string>
     <string name="error_db_failed">Database execution failure, check logs.</string>
+
+    <!-- Home Explore Fragment Strings -->
+    <string name="home_label">HOME</string>
+    <string name="notifications_desc">Notifications</string>
+    <string name="favorites_desc">Favorites</string>
+    <string name="search_icon_desc">Search Icon</string>
+    <string name="welcome_back">Welcome Back,</string>
+    <string name="view_all_items">View all available items</string>
+    <string name="user_avatar_desc">User Avatar</string>
 </resources>

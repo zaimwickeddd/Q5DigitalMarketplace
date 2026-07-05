@@ -12,7 +12,7 @@
         android:id="@+id/tv_brand_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="HOME"
+        android:text="@string/home_label"
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#1A1C1E"
@@ -32,7 +32,7 @@
             android:layout_height="36dp"
             android:background="@android:drawable/btn_default"
             android:src="@android:drawable/ic_popup_reminder"
-            android:contentDescription="Notifications"
+            android:contentDescription="@string/notifications_desc"
             android:layout_marginEnd="8dp"/>
 
         <ImageView
@@ -40,7 +40,7 @@
             android:layout_height="36dp"
             android:background="@android:drawable/btn_default"
             android:src="@android:drawable/btn_star_big_off"
-            android:contentDescription="Favorites" />
+            android:contentDescription="@string/favorites_desc" />
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
@@ -65,7 +65,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
-                android:contentDescription="Search Icon" />
+                android:contentDescription="@string/search_icon_desc" />
 
             <EditText
                 android:id="@+id/search_bar"
@@ -86,7 +86,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="Welcome Back,\nAwang Najib 👋"
+        android:text="@string/welcome_back"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#1A1C1E"
@@ -97,7 +97,7 @@
         android:id="@+id/tv_subtitle_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="View all available items"
+        android:text="@string/view_all_items"
         android:textColor="#74777F"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/tv_greeting_title"
@@ -118,28 +118,52 @@
             android:layout_height="match_parent"
             android:src="@android:drawable/ic_menu_report_image"
             android:scaleType="centerCrop"
-            android:contentDescription="User Avatar" />
+            android:contentDescription="@string/user_avatar_desc" />
     </androidx.cardview.widget.CardView>
 
     <HorizontalScrollView
         android:id="@+id/hsv_categories"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/tv_subtitle_hint"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="4dp">
+            android:paddingBottom="8dp">
 
-            <Button style="?android:attr/buttonStyleSmall" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Recommended" android:backgroundTint="#3B5998" android:textColor="#FFFFFF" android:layout_marginEnd="8dp"/>
-            <Button style="?android:attr/buttonStyleSmall" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Hot Trending" android:backgroundTint="#E0E2EC" android:textColor="#44474F" android:layout_marginEnd="8dp"/>
-            <Button style="?android:attr/buttonStyleSmall" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Top" android:backgroundTint="#E0E2EC" android:textColor="#44474F" android:layout_marginEnd="8dp"/>
-            <Button style="?android:attr/buttonStyleSmall" android:layout_width="wrap_content" android:layout_height="40dp" android:text="Rating" android:backgroundTint="#E0E2EC" android:textColor="#44474F" />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_all"
+                android:layout_marginEnd="8dp"
+                style="?attr/materialButtonOutlinedStyle"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_books"
+                android:layout_marginEnd="8dp"
+                style="?attr/materialButtonOutlinedStyle"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_electronics"
+                android:layout_marginEnd="8dp"
+                style="?attr/materialButtonOutlinedStyle"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/filter_clothes"
+                style="?attr/materialButtonOutlinedStyle"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 
