@@ -1,5 +1,6 @@
 package com.example.q5digitalmarketplace;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +31,19 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ViewHold
         holder.tvTitle.setText(listing.getTitle());
         holder.tvPrice.setText(listing.getCardPrice());
         holder.tvTag.setText(listing.getCategory() + " • " + listing.getCondition());
-        holder.imgPreview.setImageResource(listing.getImageResourceId());
+
+        // DYNAMIC IMAGE RENDERING: Checks if a custom image path from the gallery exists
+        if (listing.getImagePath() != null && !listing.getImagePath().isEmpty()) {
+            try {
+                holder.imgPreview.setImageURI(Uri.parse(listing.getImagePath()));
+            } catch (Exception e) {
+                // If the URI is invalid or inaccessible, load the default system gallery placeholder safely
+                holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+        } else {
+            // Default placeholder fallback rule for older listings missing an explicit image path
+            holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
+        }
     }
 
     @Override

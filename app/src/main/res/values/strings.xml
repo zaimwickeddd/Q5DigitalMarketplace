@@ -10,4 +10,10 @@
     <string name="filter_books">Books</string>
     <string name="filter_electronics">Electronics</string>
     <string name="filter_clothes">Clothes</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="char_counter_template">%1$d/300</string>
+    <string name="error_missing_fields">Please fill in all required fields</string>
+    <string name="success_listing_added">Listing added successfully!</string>
+    <string name="error_db_failed">Database execution failure, check logs.</string>
 </resources>

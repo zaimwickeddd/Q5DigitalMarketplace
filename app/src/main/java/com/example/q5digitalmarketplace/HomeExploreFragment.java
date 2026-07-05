@@ -27,7 +27,7 @@ public class HomeExploreFragment extends Fragment {
         // 1. Fetch live records from local SQLite DB
         List<Listing> campusItemsList = dbHelper.getAllListings();
 
-        // 2. Pre-populate default listings on first run so the app isn't empty for your lecturer
+        // 2. Pre-populate default listings on first run so the app isn't empty for your project evaluation
         if (campusItemsList.isEmpty()) {
             insertInitialData();
             campusItemsList = dbHelper.getAllListings(); // Re-fetch after filling
@@ -41,9 +41,10 @@ public class HomeExploreFragment extends Fragment {
     }
 
     private void insertInitialData() {
-        dbHelper.insertListing(new Listing("Lenovo LOQ Laptop", "RM 1,500", "Electronics", "Used", android.R.drawable.ic_menu_compass));
-        dbHelper.insertListing(new Listing("Introductory Mandarin Book", "RM 30", "Books", "Brand New", android.R.drawable.ic_menu_help));
-        dbHelper.insertListing(new Listing("Cabana Vintage Shirt", "RM 50", "Clothes", "Used", android.R.drawable.ic_menu_gallery));
-        dbHelper.insertListing(new Listing("Adidas Originals Backpack", "RM 129", "Bags", "Brand New", android.R.drawable.ic_menu_save));
+        // FIXED: Replaced int drawable resources with clean String parameters ("") to match your new text column specifications
+        dbHelper.insertListing(new Listing("Lenovo LOQ Laptop", "RM 1,500", "Electronics", "Used", "", "Reliable entry-level gaming laptop. Used for assignments only."));
+        dbHelper.insertListing(new Listing("Introductory Mandarin Book", "RM 30", "Books", "Brand New", "", "Excellent reference textbook with full exercises and basic conversational guides."));
+        dbHelper.insertListing(new Listing("Cabana Vintage Shirt", "RM 50", "Clothes", "Used", "", "Comfortable casual wear shirt. Good condition with zero faded spots."));
+        dbHelper.insertListing(new Listing("Adidas Originals Backpack", "RM 129", "Bags", "Brand New", "", "Spacious main compartment. Brand new item received as an unneeded gift."));
     }
 }

@@ -12,10 +12,8 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 2; // Incremented version to force database update
-
-    // Table and Column names for Listings
-    private static final int DATABASE_VERSION = 9;
+    // Bumped to version 11 to update schema for dynamic text paths and custom descriptions
+    private static final int DATABASE_VERSION = 11;
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";
@@ -23,7 +21,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PRICE = "price";
     public static final String COLUMN_CATEGORY = "category";
     public static final String COLUMN_CONDITION = "condition";
-    public static final String COLUMN_IMAGE_RES = "image_resource_id";
+    public static final String COLUMN_IMAGE_RES = "image_resource_id"; // Now holds TEXT path URIs
+    public static final String COLUMN_DESCRIPTION = "description"; // Dedicated new column
 
     public static final String TABLE_USERS = "users";
     public static final String COLUMN_USER_ID = "user_id";
@@ -37,67 +36,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // 1. Create Listings Table
-        String CREATE_LISTINGS_TABLE = "CREATE TABLE " + TABLE_LISTINGS + "("
-                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
-                + COLUMN_TITLE + " TEXT,"
-                + COLUMN_PRICE + " TEXT,"
-                + COLUMN_CATEGORY + " TEXT,"
-                + COLUMN_CONDITION + " TEXT,"
-                + COLUMN_IMAGE_RES + " INTEGER" + ")";
-        db.execSQL(CREATE_LISTINGS_TABLE);
-
-        // 2. Create Student Table
-        String CREATE_STUDENT_TABLE = "CREATE TABLE Student ("
-                + "StuID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "Name TEXT, "
-                + "Email TEXT, "
-                + "PhoneNum TEXT, "
-                + "UserType TEXT);";
-        db.execSQL(CREATE_STUDENT_TABLE);
-
-        // 3. Create Buyer Table
-        String CREATE_BUYER_TABLE = "CREATE TABLE Buyer ("
-                + "BuyerID INTEGER PRIMARY KEY, "
-                + "BuyerBio TEXT, "
-                + "Date_Joined TEXT, "
-                + "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));";
-        db.execSQL(CREATE_BUYER_TABLE);
-
-        // 4. Create Seller Table
-        String CREATE_SELLER_TABLE = "CREATE TABLE Seller ("
-                + "SellerID INTEGER PRIMARY KEY, "
-                + "StoreBio TEXT, "
-                + "FOREIGN KEY(SellerID) REFERENCES Student(StuID));";
-        db.execSQL(CREATE_SELLER_TABLE);
-
-        // 5. Create Wishlist Table
-        String CREATE_WISHLIST_TABLE = "CREATE TABLE Wishlist ("
-                + "WishListID INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "Date_Added TEXT, "
-                + "BuyerID INTEGER, "
-                + "ItemID INTEGER, "
-                + "FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), "
-                + "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));";
-        db.execSQL(CREATE_WISHLIST_TABLE);
-
-        // Pre-populate your own profile into Student table so your Profile tab has active data
-        db.execSQL("INSERT INTO Student (Name, Email, PhoneNum, UserType) VALUES ('Awang Najib', 'najib123@gmail.com', '0123456789', 'B');");
         try {
-            db.execSQL("CREATE TABLE " + TABLE_LISTINGS + "("
+            // 1. Create Listings Table with Updated Data Types
+            String CREATE_LISTINGS_TABLE = "CREATE TABLE " + TABLE_LISTINGS + "("
                     + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_TITLE + " TEXT,"
                     + COLUMN_PRICE + " TEXT,"
                     + COLUMN_CATEGORY + " TEXT,"
                     + COLUMN_CONDITION + " TEXT,"
-                    + COLUMN_IMAGE_RES + " INTEGER" + ")");
+                    + COLUMN_IMAGE_RES + " TEXT," // Changed to TEXT to store image paths from gallery
+                    + COLUMN_DESCRIPTION + " TEXT" + ")";
+            db.execSQL(CREATE_LISTINGS_TABLE);
 
-            db.execSQL("CREATE TABLE " + TABLE_USERS + "("
+            // 2. Create Student Table
+            String CREATE_STUDENT_TABLE = "CREATE TABLE Student ("
+                    + "StuID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "Name TEXT, "
+                    + "Email TEXT, "
+                    + "PhoneNum TEXT, "
+                    + "UserType TEXT);";
+            db.execSQL(CREATE_STUDENT_TABLE);
+
+            // 3. Create Buyer Table
+            String CREATE_BUYER_TABLE = "CREATE TABLE Buyer ("
+                    + "BuyerID INTEGER PRIMARY KEY, "
+                    + "BuyerBio TEXT, "
+                    + "Date_Joined TEXT, "
+                    + "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));";
+            db.execSQL(CREATE_BUYER_TABLE);
+
+            // 4. Create Seller Table
+            String CREATE_SELLER_TABLE = "CREATE TABLE Seller ("
+                    + "SellerID INTEGER PRIMARY KEY, "
+                    + "StoreBio TEXT, "
+                    + "FOREIGN KEY(SellerID) REFERENCES Student(StuID));";
+            db.execSQL(CREATE_SELLER_TABLE);
+
+            // 5. Create Wishlist Table
+            String CREATE_WISHLIST_TABLE = "CREATE TABLE Wishlist ("
+                    + "WishListID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    + "Date_Added TEXT, "
+                    + "BuyerID INTEGER, "
+                    + "ItemID INTEGER, "
+                    + "FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), "
+                    + "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));";
+            db.execSQL(CREATE_WISHLIST_TABLE);
+
+            // 6. Create Users Table (for Authentication)
+            String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + "("
                     + COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
                     + COLUMN_USERNAME + " TEXT,"
                     + COLUMN_USER_EMAIL + " TEXT UNIQUE,"
-                    + COLUMN_USER_PASSWORD + " TEXT" + ")");
-            Log.d("DatabaseHelper", "Tables created successfully");
+                    + COLUMN_USER_PASSWORD + " TEXT" + ")";
+            db.execSQL(CREATE_USERS_TABLE);
+
+            // Pre-populate profile
+            db.execSQL("INSERT INTO Student (Name, Email, PhoneNum, UserType) VALUES ('Awang Najib', 'najib123@gmail.com', '0123456789', 'B');");
+
+            Log.d("DatabaseHelper", "Tables created successfully with upgraded schema attributes");
         } catch (Exception e) {
             Log.e("DatabaseHelper", "Error creating tables", e);
         }
@@ -110,10 +106,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Seller");
         db.execSQL("DROP TABLE IF EXISTS Buyer");
         db.execSQL("DROP TABLE IF EXISTS Student");
-        onCreate(db);
-    }
-
-    // --- EXISTING LISTING METHODS ---
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
         onCreate(db);
     }
@@ -161,7 +153,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_PRICE, listing.getPrice());
         values.put(COLUMN_CATEGORY, listing.getCategory());
         values.put(COLUMN_CONDITION, listing.getCondition());
-        values.put(COLUMN_IMAGE_RES, listing.getImageResourceId());
+        values.put(COLUMN_IMAGE_RES, listing.getImagePath()); // Inserts the String path URL natively
+        values.put(COLUMN_DESCRIPTION, listing.getDescription()); // Direct description text column mapping
 
         try {
             db.insert(TABLE_LISTINGS, null, values);
@@ -185,7 +178,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
                             cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)),
-                            cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES))
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)), // Reads String text out cleanly
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)) // Extracts clean description field
                     ));
                 } while (cursor.moveToNext());
             }
@@ -196,14 +190,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    // --- WISHLIST & PROFILE PROFILE QUERIES ---
-
     public boolean insertWishlist(int buyerId, int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("BuyerID", buyerId);
         values.put("ItemID", itemId);
-        values.put("Date_Added", "2026-06-22"); // Tracks current project simulation date
+        values.put("Date_Added", "2026-06-22");
         long result = db.insert("Wishlist", null, values);
         db.close();
         return result != -1;

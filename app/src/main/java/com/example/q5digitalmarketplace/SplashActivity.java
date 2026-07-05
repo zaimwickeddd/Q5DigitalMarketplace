@@ -7,20 +7,12 @@ import android.os.Looper;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SplashActivity extends AppCompatActivity {
-
-import androidx.appcompat.app.AppCompatActivity;
-
-public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            Intent intent = new Intent(SplashActivity.this, WelcomeActivity.class);
-            startActivity(intent);
-            finish();
-        new Handler().postDelayed(() -> {
             // After 2 seconds, go to Login screen
             Intent intent = new Intent(SplashActivity.this, LoginActivity.class);
             startActivity(intent);

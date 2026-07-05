@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8FAFC">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Media"
+            android:textColor="#1E293B"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_add_photos"
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="#E2E8F0"
+            app:cardCornerRadius="12dp"
+            app:strokeColor="#94A3B8"
+            app:strokeWidth="1dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/iv_image_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
+                <LinearLayout
+                    android:id="@+id/layout_placeholder"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:orientation="vertical"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@android:drawable/ic_input_add"
+                        app:tint="#38BDF8"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Add Photo From Gallery *"
+                        android:textColor="#38BDF8"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Details"
+            android:textColor="#1E293B"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Item Title *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <EditText
+            android:id="@+id/et_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:paddingHorizontal="12dp"
+            android:inputType="text"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <EditText
+            android:id="@+id/et_item_price"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:paddingHorizontal="12dp"
+            android:hint="MYR"
+            android:textColorHint="#38BDF8"
+            android:inputType="numberDecimal"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Condition *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <Spinner
+            android:id="@+id/spinner_condition"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Item Type *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <Spinner
+            android:id="@+id/spinner_item_type"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Faculty Category *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <Spinner
+            android:id="@+id/spinner_faculty"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Description *"
+            android:textColor="#1E293B"
+            android:textStyle="bold"
+            android:textSize="14sp"/>
+        <EditText
+            android:id="@+id/et_item_description"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:background="@android:drawable/screen_background_light_transparent"
+            android:backgroundTint="#E2E8F0"
+            android:gravity="top|start"
+            android:padding="12dp"
+            android:maxLength="300"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="4dp"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:id="@+id/tv_char_counter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0/300"
+            android:gravity="end"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:layout_marginBottom="24dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_item"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Add Item"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:backgroundTint="#4DE1E3"
+            app:cornerRadius="12dp"
+            android:layout_marginBottom="20dp"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
