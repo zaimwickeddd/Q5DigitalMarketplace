@@ -32,24 +32,48 @@ public class ProfileDashboardFragment extends Fragment {
         // Handle logout trigger action button
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
             if (getActivity() != null) {
-                getActivity().finish(); // Simple exit action execution
+                android.content.Intent intent = new android.content.Intent(getActivity(), WelcomeActivity.class);
+                intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                getActivity().finish();
             }
+        });
+
+        // Handle Account Settings navigation
+        view.findViewById(R.id.rl_account_settings).setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new AccountSettingsFragment())
+                    .addToBackStack(null)
+                    .commit();
         });
 
         return view;
     }
 
     private void loadProfileData() {
-        // Query record row for student session context (Using ID 1)
-        Cursor cursor = dbHelper.getStudentProfile(1);
-        if (cursor != null && cursor.moveToFirst()) {
-            tvName.setText(cursor.getString(0));
-            tvEmail.setText(cursor.getString(1));
-            cursor.close();
+        // 1. Safely capture session email from host activity login intent
+        String loggedInEmail = null;
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            loggedInEmail = getActivity().getIntent().getStringExtra("USER_EMAIL");
+        }
+
+        if (loggedInEmail != null && !loggedInEmail.isEmpty()) {
+            // Query record row for the signed-in user
+            Cursor cursor = dbHelper.getStudentProfileByEmail(loggedInEmail);
+            if (cursor != null && cursor.moveToFirst()) {
+                tvName.setText(cursor.getString(0)); // Name
+                tvEmail.setText(cursor.getString(1)); // Email
+                cursor.close();
+            } else {
+                // Fallback to name from Users table if Student record not found
+                String username = dbHelper.getUserNameByEmail(loggedInEmail);
+                tvName.setText(username);
+                tvEmail.setText(loggedInEmail);
+            }
         } else {
-            // Fallback default placeholder info
-            tvName.setText("Awang Najib");
-            tvEmail.setText("najib123@gmail.com");
+            // Fallback default placeholder info for Guest or missing session
+            tvName.setText("Guest User");
+            tvEmail.setText("Not signed in");
         }
 
         // Pull active contextual dynamic transaction counts
