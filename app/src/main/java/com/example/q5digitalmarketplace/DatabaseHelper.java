@@ -220,6 +220,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.rawQuery("SELECT Name, Email FROM Student WHERE StuID = ?", new String[]{String.valueOf(stuId)});
     }
 
+    public Cursor getStudentProfileByEmail(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT Name, Email FROM Student WHERE Email = ?", new String[]{email});
+    }
+
     public int getListingsCount() {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS, null);
