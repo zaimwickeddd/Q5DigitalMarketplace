@@ -11,13 +11,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.navigation.NavigationView;
 import java.util.List;
 
 public class ExploreItemsFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
-    private DrawerLayout drawerLayout;
 
     @Nullable
     @Override
@@ -25,7 +23,6 @@ public class ExploreItemsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_explore_items, container, false);
 
         dbHelper = new DatabaseHelper(getContext());
-        drawerLayout = view.findViewById(R.id.explore_drawer_layout);
 
         // Setup Grid List View
         RecyclerView recyclerView = view.findViewById(R.id.rv_explore_items_list);
@@ -34,26 +31,35 @@ public class ExploreItemsFragment extends Fragment {
         ListingAdapter adapter = new ListingAdapter(itemsList);
         recyclerView.setAdapter(adapter);
 
-        // 1. Open the Side Filter panel when clicking the blue header button
-        view.findViewById(R.id.btn_open_filters).setOnClickListener(v -> {
-            drawerLayout.openDrawer(GravityCompat.END); // Opens smoothly from the right side
-        });
+        // ==================== STEP 3: GLOBAL SIDEBAR INTEGRATION ====================
 
-        // 2. Listen for category selections inside your sidebar
-        NavigationView filterSidebar = view.findViewById(R.id.filter_navigation_sidebar);
-        filterSidebar.setNavigationItemSelectedListener(item -> {
-            int itemId = item.getItemId();
+        // Connect the blue button directly to the master layout wrapper inside MainActivity
+        if (getActivity() != null) {
+            // Find the global activity-level DrawerLayout wrapper instead of fragment-level right drawers
+            DrawerLayout globalDrawerLayout = getActivity().findViewById(R.id.drawer_layout);
+            View btnOpenFilters = view.findViewById(R.id.btn_open_filters);
 
-            if (itemId == R.id.filter_recommended) {
-                // Perform target query data filtering actions...
-            } else if (itemId == R.id.filter_trending) {
-                // Handle filter logic...
+            if (btnOpenFilters != null && globalDrawerLayout != null) {
+                // Change GravityCompat.END to GravityCompat.START to match your primary left-hand side menu
+                btnOpenFilters.setOnClickListener(v -> globalDrawerLayout.openDrawer(GravityCompat.START));
             }
+        }
 
-            drawerLayout.closeDrawer(GravityCompat.END); // Auto slide closed after tap
-            return true;
-        });
+        // ============================================================================
 
         return view;
+    }
+
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (getActivity() != null) {
+            DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+            View btnOpenFiltersHome = view.findViewById(R.id.btn_open_filters_home);
+
+            if (btnOpenFiltersHome != null && drawerLayout != null) {
+                btnOpenFiltersHome.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+            }
+        }
     }
 }

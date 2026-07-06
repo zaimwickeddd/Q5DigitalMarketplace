@@ -6,42 +6,61 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F9FC"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:fitsSystemWindows="true"> <TextView
+    android:id="@+id/tv_brand_logo"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="@string/home_label"
+    android:textSize="22sp"
+    android:textStyle="bold"
+    android:textColor="#1A1C1E"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/tv_brand_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/home_label"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#1A1C1E"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <LinearLayout
-        android:id="@+id/layout_top_actions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/btn_open_filters_home"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        app:cardCornerRadius="24dp"
+        app:cardBackgroundColor="#38BDF8"
+        app:strokeWidth="0dp"
+        app:cardElevation="2dp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:drawable/btn_default"
-            android:src="@android:drawable/ic_popup_reminder"
-            android:contentDescription="@string/notifications_desc"
-            android:layout_marginEnd="8dp"/>
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:src="@android:drawable/ic_menu_manage"
+            android:contentDescription="@string/filter_icon_desc"
+            app:tint="#FFFFFF" />
+    </com.google.android.material.card.MaterialCardView>
 
-        <ImageView
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:drawable/btn_default"
-            android:src="@android:drawable/btn_star_big_off"
-            android:contentDescription="@string/favorites_desc" />
-    </LinearLayout>
+    <ImageView
+        android:id="@+id/iv_fav_star"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:src="@android:drawable/btn_star_big_off"
+        android:contentDescription="@string/favorites_desc"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/btn_open_filters_home"
+        app:layout_constraintEnd_toStartOf="@id/btn_open_filters_home" />
+
+    <ImageView
+        android:id="@+id/iv_notif_bell"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:src="@android:drawable/ic_popup_reminder"
+        android:contentDescription="@string/notifications_desc"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/btn_open_filters_home"
+        app:layout_constraintEnd_toStartOf="@id/iv_fav_star" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_search_wrapper"
@@ -121,59 +140,13 @@
             android:contentDescription="@string/user_avatar_desc" />
     </androidx.cardview.widget.CardView>
 
-    <HorizontalScrollView
-        android:id="@+id/hsv_categories"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/tv_subtitle_hint"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="8dp">
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/filter_all"
-                android:layout_marginEnd="8dp"
-                style="?attr/materialButtonOutlinedStyle"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/filter_books"
-                android:layout_marginEnd="8dp"
-                style="?attr/materialButtonOutlinedStyle"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/filter_electronics"
-                android:layout_marginEnd="8dp"
-                style="?attr/materialButtonOutlinedStyle"/>
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/filter_clothes"
-                style="?attr/materialButtonOutlinedStyle"/>
-
-        </LinearLayout>
-    </HorizontalScrollView>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_explore_items"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="12dp"
         android:scrollbars="vertical"
-        app:layout_constraintTop_toBottomOf="@id/hsv_categories"
+        app:layout_constraintTop_toBottomOf="@id/tv_subtitle_hint"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

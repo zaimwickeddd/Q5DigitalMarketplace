@@ -2,20 +2,35 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/cat_all"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="All Items" />
+
+        <item
+            android:id="@+id/cat_electronics"
+            android:icon="@android:drawable/ic_menu_compass"
+            android:title="Electronics" />
+        <item
+            android:id="@+id/cat_books"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="Books" />
+        <item
+            android:id="@+id/cat_clothes"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:title="Clothes &amp; Fashion" />
+        <item
+            android:id="@+id/cat_bags"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="Bags &amp; Accessories" />
+
+        <!-- Added missing filter IDs used in ExploreItemsFragment -->
+        <item
             android:id="@+id/filter_recommended"
             android:icon="@android:drawable/btn_star_big_on"
             android:title="Recommended" />
         <item
             android:id="@+id/filter_trending"
-            android:icon="@android:drawable/ic_menu_compass"
-            android:title="Hot Trending" />
-        <item
-            android:id="@+id/filter_top"
-            android:icon="@android:drawable/ic_menu_upload"
-            android:title="Top Items" />
-        <item
-            android:id="@+id/filter_rating"
-            android:icon="@android:drawable/btn_star_big_off"
-            android:title="Highest Rating" />
+            android:icon="@android:drawable/ic_menu_send"
+            android:title="Trending" />
     </group>
 </menu>

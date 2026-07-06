@@ -1,106 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/explore_drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F7F9FC">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#F7F9FC">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+            android:layout_marginBottom="24dp">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_explore_header"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
+                android:text="Explore\nItems"
+                android:textColor="#1E293B"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:lineSpacingMultiplier="0.9"/>
 
-                <TextView
-                    android:id="@+id/tv_explore_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Explore\nItems"
-                    android:textColor="#1E293B"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    android:lineSpacingMultiplier="0.9"/>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
+                    android:layout_width="140dp"
+                    android:layout_height="44dp"
+                    android:background="@android:drawable/screen_background_light_transparent"
+                    android:elevation="2dp"
+                    android:backgroundTint="#FFFFFF"
+                    android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginEnd="10dp">
 
-                    <LinearLayout
-                        android:layout_width="140dp"
-                        android:layout_height="44dp"
-                        android:background="@android:drawable/screen_background_light_transparent"
-                        android:elevation="2dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingHorizontal="12dp"
-                        android:layout_marginEnd="10dp">
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@android:drawable/ic_menu_search"
+                        android:contentDescription="@string/search_icon_desc"
+                        app:tint="#38BDF8"/>
 
-                        <ImageView
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@android:drawable/ic_menu_search"
-                            app:tint="#38BDF8"/>
-
-                        <EditText
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:background="@null"
-                            android:hint="Search"
-                            android:textColorHint="#94A3B8"
-                            android:textSize="14sp"
-                            android:inputType="text"/>
-                    </LinearLayout>
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/btn_open_filters"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        app:cardCornerRadius="22dp"
-                        app:cardBackgroundColor="#38BDF8"
-                        app:strokeWidth="0dp"
-                        app:cardElevation="2dp"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:layout_gravity="center"
-                            android:src="@android:drawable/ic_menu_manage"
-                            app:tint="#FFFFFF"/>
-                    </com.google.android.material.card.MaterialCardView>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@null"
+                        android:hint="Search"
+                        android:textColorHint="#94A3B8"
+                        android:textSize="14sp"
+                        android:inputType="text"
+                        android:importantForAutofill="no"/>
                 </LinearLayout>
-            </RelativeLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_explore_items_list"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/btn_open_filters"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardCornerRadius="22dp"
+                    app:cardBackgroundColor="#38BDF8"
+                    app:strokeWidth="0dp"
+                    app:cardElevation="2dp"
+                    android:clickable="true"
+                    android:focusable="true">
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@android:drawable/ic_menu_manage"
+                        android:contentDescription="@string/filter_icon_desc"
+                        app:tint="#FFFFFF" />
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </RelativeLayout>
 
-    <com.google.android.material.navigation.NavigationView
-        android:id="@+id/filter_navigation_sidebar"
-        android:layout_width="240dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:background="#FFFFFF"
-        app:menu="@menu/filter_sidebar_menu" /> </androidx.drawerlayout.widget.DrawerLayout>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_explore_items_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

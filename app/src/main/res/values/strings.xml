@@ -25,4 +25,8 @@
     <string name="welcome_back">Welcome Back,</string>
     <string name="view_all_items">View all available items</string>
     <string name="user_avatar_desc">User Avatar</string>
+
+    <string name="filter_recommended">Recommended</string>
+    <string name="filter_trending">Trending</string>
+    <string name="filter_icon_desc">Filter Items</string>
 </resources>

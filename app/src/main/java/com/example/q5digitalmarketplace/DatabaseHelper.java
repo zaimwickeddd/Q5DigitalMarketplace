@@ -237,4 +237,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         return count;
     }
+    public List<Listing> getListingsByCategory(String categoryName) {
+        List<Listing> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            // Query the database matching rows inside your COLUMN_CATEGORY column
+            cursor = db.rawQuery("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_CATEGORY + " = ?", new String[]{categoryName});
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    list.add(new Listing(
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)),
+                            cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION))
+                    ));
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            android.util.Log.e("DatabaseHelper", "Error filtering categories", e);
+        } finally {
+            if (cursor != null) cursor.close();
+            db.close();
+        }
+        return list;
+    }
 }
