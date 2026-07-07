@@ -1,6 +1,6 @@
 package com.example.q5digitalmarketplace;
 
-import android.net.Uri;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +13,15 @@ import java.util.List;
 public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ViewHolder> {
 
     private final List<Listing> itemsList;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(Listing listing);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
 
     public ListingAdapter(List<Listing> itemsList) {
         this.itemsList = itemsList;
@@ -30,20 +39,34 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ViewHold
         Listing listing = itemsList.get(position);
         holder.tvTitle.setText(listing.getTitle());
         holder.tvPrice.setText(listing.getCardPrice());
-        holder.tvTag.setText(listing.getCategory() + " • " + listing.getCondition());
+        holder.tvTag.setText(String.format("%s • %s", listing.getCategory(), listing.getCondition()));
 
-        // DYNAMIC IMAGE RENDERING: Checks if a custom image path from the gallery exists
-        if (listing.getImagePath() != null && !listing.getImagePath().isEmpty()) {
-            try {
-                holder.imgPreview.setImageURI(Uri.parse(listing.getImagePath()));
-            } catch (Exception e) {
-                // If the URI is invalid or inaccessible, load the default system gallery placeholder safely
+        // --- FIXED IMAGE LOADING LOGIC ---
+        String imageName = listing.getImagePath();
+        Context context = holder.itemView.getContext();
+
+        if (imageName != null && !imageName.isEmpty()) {
+            // Dynamically look up the integer resource ID matching the filename string in res/drawable
+            int imageResId = context.getResources().getIdentifier(imageName, "drawable", context.getPackageName());
+
+            if (imageResId != 0) {
+                // Image file found successfully! Load it.
+                holder.imgPreview.setImageResource(imageResId);
+            } else {
+                // Image string didn't match any file name in drawables -> Fallback to placeholder
                 holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
             }
         } else {
-            // Default placeholder fallback rule for older listings missing an explicit image path
+            // String path was completely empty -> Fallback to placeholder
             holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
         }
+        // ----------------------------------
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(listing);
+            }
+        });
     }
 
     @Override

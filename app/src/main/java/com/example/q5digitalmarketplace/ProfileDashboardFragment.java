@@ -1,11 +1,13 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -14,6 +16,8 @@ public class ProfileDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
     private TextView tvName, tvEmail, tvListings, tvFavourites;
+    // Hardcoded ID as per your current implementation
+    private final int currentUserId = 1;
 
     @Nullable
     @Override
@@ -22,62 +26,55 @@ public class ProfileDashboardFragment extends Fragment {
 
         dbHelper = new DatabaseHelper(getContext());
 
+        // Initialize UI components
         tvName = view.findViewById(R.id.tv_profile_name);
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvListings = view.findViewById(R.id.tv_count_listings);
         tvFavourites = view.findViewById(R.id.tv_count_favourites);
 
-        loadProfileData();
+        // Navigation to My Listings page
+        view.findViewById(R.id.layout_my_listings).setOnClickListener(v -> {
+            // Intent intent = new Intent(getActivity(), MyListingsActivity.class);
+            // Optionally pass the ID if needed later: intent.putExtra("USER_ID", currentUserId);
+            // startActivity(intent);
+            Toast.makeText(getContext(), "My Listings feature coming soon!", Toast.LENGTH_SHORT).show();
+        });
 
-        // Handle logout trigger action button
+        // Sign-out action
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
             if (getActivity() != null) {
-                android.content.Intent intent = new android.content.Intent(getActivity(), WelcomeActivity.class);
-                intent.setFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK | android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 getActivity().finish();
             }
         });
 
-        // Handle Account Settings navigation
-        view.findViewById(R.id.rl_account_settings).setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, new AccountSettingsFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
-
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfileData();
+    }
+
     private void loadProfileData() {
-        // 1. Safely capture session email from host activity login intent
-        String loggedInEmail = null;
-        if (getActivity() != null && getActivity().getIntent() != null) {
-            loggedInEmail = getActivity().getIntent().getStringExtra("USER_EMAIL");
-        }
-
-        if (loggedInEmail != null && !loggedInEmail.isEmpty()) {
-            // Query record row for the signed-in user
-            Cursor cursor = dbHelper.getStudentProfileByEmail(loggedInEmail);
-            if (cursor != null && cursor.moveToFirst()) {
-                tvName.setText(cursor.getString(0)); // Name
-                tvEmail.setText(cursor.getString(1)); // Email
-                cursor.close();
-            } else {
-                // Fallback to name from Users table if Student record not found
-                String username = dbHelper.getUserNameByEmail(loggedInEmail);
-                tvName.setText(username);
-                tvEmail.setText(loggedInEmail);
-            }
+        // Query profile record for the specific user
+        Cursor cursor = dbHelper.getStudentProfile(currentUserId);
+        if (cursor != null && cursor.moveToFirst()) {
+            tvName.setText(cursor.getString(0));
+            tvEmail.setText(cursor.getString(1));
+            cursor.close();
         } else {
-            // Fallback default placeholder info for Guest or missing session
-            tvName.setText("Guest User");
-            tvEmail.setText("Not signed in");
+            tvName.setText("User");
+            tvEmail.setText("user@example.com");
         }
 
-        // Pull active contextual dynamic transaction counts
-        tvListings.setText(String.valueOf(dbHelper.getListingsCount()));
+        // UPDATED: Use the new method to show count for THIS user only
+        tvListings.setText(String.valueOf(dbHelper.getMyListingsCount(currentUserId)));
+
+        // Assuming your wishlist count is global or also filtered by user
         tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
     }
 }

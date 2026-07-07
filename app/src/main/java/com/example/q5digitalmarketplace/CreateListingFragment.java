@@ -31,6 +31,7 @@ public class CreateListingFragment extends Fragment {
     private DatabaseHelper dbHelper;
 
     private String selectedImageUriStr = "";
+    private final int currentUserId = 1; // Hardcoded ID to match ProfileDashboardFragment implementation
 
     // CLEANER ALIGNED SYNTAX: Uses simple top-level class contract type mapping
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
@@ -119,6 +120,7 @@ public class CreateListingFragment extends Fragment {
 
         String category = spinnerCategory.getSelectedItem().toString();
         String condition = spinnerCondition.getSelectedItem().toString();
+        String faculty = spinnerFaculty.getSelectedItem().toString();
 
         if (title.isEmpty() || priceStr.isEmpty() || description.isEmpty() || selectedImageUriStr.isEmpty() ||
                 spinnerCategory.getSelectedItemPosition() == 0 ||
@@ -131,7 +133,7 @@ public class CreateListingFragment extends Fragment {
 
         String finalPrice = "RM " + priceStr;
 
-        Listing newListing = new Listing(title, finalPrice, category, condition, selectedImageUriStr, description);
+        Listing newListing = new Listing(title, finalPrice, category, condition, selectedImageUriStr, description, faculty, currentUserId);
 
         try {
             dbHelper.insertListing(newListing);

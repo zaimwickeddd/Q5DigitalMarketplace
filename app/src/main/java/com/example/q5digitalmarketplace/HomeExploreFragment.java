@@ -106,9 +106,9 @@ public class HomeExploreFragment extends Fragment {
     }
 
     private void insertInitialData() {
-        dbHelper.insertListing(new Listing("Lenovo LOQ Laptop", "RM 1,500", "Electronics", "Used", "", "Reliable entry-level gaming laptop. Used for assignments only."));
-        dbHelper.insertListing(new Listing("Introductory Mandarin Book", "RM 30", "Books", "Brand New", "", "Excellent reference textbook with full exercises and basic conversational guides."));
-        dbHelper.insertListing(new Listing("Cabana Vintage Shirt", "RM 50", "Clothes", "Used", "", "Comfortable casual wear shirt. Good condition with zero faded spots."));
-        dbHelper.insertListing(new Listing("Adidas Originals Backpack", "RM 129", "Bags", "Brand New", "", "Spacious main compartment. Brand new item received as an unneeded gift."));
+        dbHelper.insertListing(new Listing("Lenovo LOQ Laptop", "RM 1,500", "Electronics", "Used", "lenovo_loq", "Reliable entry-level gaming laptop. Used for assignments only."));
+        dbHelper.insertListing(new Listing("Introductory Mandarin Book", "RM 30", "Books", "Brand New", "mandarin_books", "Excellent reference textbook with full exercises and basic conversational guides."));
+        dbHelper.insertListing(new Listing("Cabana Vintage Shirt", "RM 50", "Clothes", "Used", "canaba_shirt", "Comfortable casual wear shirt. Good condition with zero faded spots."));
+        dbHelper.insertListing(new Listing("Adidas Originals Backpack", "RM 129", "Bags", "Brand New", "adidas_backpack", "Spacious main compartment. Brand new item received as an unneeded gift."));
     }
 }
