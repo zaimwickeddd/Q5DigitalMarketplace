@@ -1,5 +1,6 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +15,8 @@ public class ProfileDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
     private TextView tvName, tvEmail, tvListings, tvFavourites;
+    // Hardcoded ID as per your current implementation
+    private final int currentUserId = 1;
 
     @Nullable
     @Override
@@ -22,38 +25,54 @@ public class ProfileDashboardFragment extends Fragment {
 
         dbHelper = new DatabaseHelper(getContext());
 
+        // Initialize UI components
         tvName = view.findViewById(R.id.tv_profile_name);
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvListings = view.findViewById(R.id.tv_count_listings);
         tvFavourites = view.findViewById(R.id.tv_count_favourites);
 
-        loadProfileData();
+        // Navigation to My Listings page
+        view.findViewById(R.id.layout_my_listings).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), MyListingsActivity.class);
+            // Optionally pass the ID if needed later: intent.putExtra("USER_ID", currentUserId);
+            startActivity(intent);
+        });
 
-        // Handle logout trigger action button
+        // Sign-out action
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
             if (getActivity() != null) {
-                getActivity().finish(); // Simple exit action execution
+                Intent intent = new Intent(getActivity(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                getActivity().finish();
             }
         });
 
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfileData();
+    }
+
     private void loadProfileData() {
-        // Query record row for student session context (Using ID 1)
-        Cursor cursor = dbHelper.getStudentProfile(1);
+        // Query profile record for the specific user
+        Cursor cursor = dbHelper.getStudentProfile(currentUserId);
         if (cursor != null && cursor.moveToFirst()) {
             tvName.setText(cursor.getString(0));
             tvEmail.setText(cursor.getString(1));
             cursor.close();
         } else {
-            // Fallback default placeholder info
-            tvName.setText("Awang Najib");
-            tvEmail.setText("najib123@gmail.com");
+            tvName.setText("User");
+            tvEmail.setText("user@example.com");
         }
 
-        // Pull active contextual dynamic transaction counts
-        tvListings.setText(String.valueOf(dbHelper.getListingsCount()));
+        // UPDATED: Use the new method to show count for THIS user only
+        tvListings.setText(String.valueOf(dbHelper.getMyListingsCount(currentUserId)));
+
+        // Assuming your wishlist count is global or also filtered by user
         tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
     }
 }

@@ -1,54 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="3dp">
+    android:layout_margin="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
+        <!-- Product Image -->
         <ImageView
             android:id="@+id/img_item"
             android:layout_width="match_parent"
             android:layout_height="140dp"
             android:scaleType="centerCrop"
+            android:background="#F1F5F9"
             android:src="@android:drawable/ic_menu_gallery" />
 
-        <TextView
-            android:id="@+id/txt_title"
+        <!-- Clean Add Button: Positioned in the corner -->
+        <ImageButton
+            android:id="@+id/btn_add"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="8dp"
+            android:background="@drawable/circle_background"
+            android:src="@android:drawable/ic_input_add"
+            app:tint="#FFFFFF"
+            android:contentDescription="Add to list" />
+
+        <!-- Content Area -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:textSize="14sp"
-            android:ellipsize="end"
-            android:maxLines="1"/>
+            android:layout_below="@id/img_item"
+            android:orientation="vertical"
+            android:padding="12dp">
 
-        <TextView
-            android:id="@+id/txt_category"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#E0E0E0"
-            android:paddingHorizontal="6dp"
-            android:paddingVertical="2dp"
-            android:textSize="10sp"
-            android:layout_marginTop="4dp" />
+            <TextView
+                android:id="@+id/txt_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#64748B"
+                android:textSize="11sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05"
+                android:text="CATEGORY" />
 
-        <TextView
-            android:id="@+id/txt_price"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textColor="#00875A"
-            android:textStyle="bold"
-            android:textSize="16sp" />
-    </LinearLayout>
-</androidx.cardview.widget.CardView>
+            <TextView
+                android:id="@+id/txt_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textStyle="bold"
+                android:textColor="#1E293B"
+                android:textSize="15sp"
+                android:ellipsize="end"
+                android:maxLines="1"/>
+
+            <TextView
+                android:id="@+id/txt_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#0284C7"
+                android:textStyle="bold"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="@color/white" />
-    <stroke android:width="1dp" android:color="#CCCCCC" />
-    <corners android:radius="25dp" />
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Matches your exact blue accent color -->
+    <solid android:color="#38B6FF" />
+    <!-- Gives it the clean oval pill shape -->
+    <corners android:radius="24dp" />
 </shape>

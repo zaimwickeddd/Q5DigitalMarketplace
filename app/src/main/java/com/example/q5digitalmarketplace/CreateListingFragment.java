@@ -1,6 +1,8 @@
 package com.example.q5digitalmarketplace;
 
-import android.net.Uri;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.PickVisualMediaRequest; // Standard single-level import
+import androidx.activity.result.PickVisualMediaRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,7 +26,7 @@ import androidx.fragment.app.Fragment;
 public class CreateListingFragment extends Fragment {
 
     private EditText etTitle, etPrice, etDescription;
-    private Spinner spinnerCategory, spinnerCondition, spinnerItemType, spinnerFaculty;
+    private Spinner spinnerCategory, spinnerCondition, spinnerFaculty;
     private TextView tvCharCounter;
     private ImageView ivImagePreview;
     private LinearLayout layoutPlaceholder;
@@ -32,16 +34,16 @@ public class CreateListingFragment extends Fragment {
 
     private String selectedImageUriStr = "";
 
-    // CLEANER ALIGNED SYNTAX: Uses simple top-level class contract type mapping
     private final ActivityResultLauncher<PickVisualMediaRequest> pickMedia =
             registerForActivityResult(new ActivityResultContracts.PickVisualMedia(), uri -> {
                 if (uri != null) {
+                    requireContext().getContentResolver().takePersistableUriPermission(uri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
                     selectedImageUriStr = uri.toString();
                     ivImagePreview.setImageURI(uri);
                     ivImagePreview.setVisibility(View.VISIBLE);
                     layoutPlaceholder.setVisibility(View.GONE);
-                } else {
-                    Toast.makeText(getContext(), "No image selected", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -61,15 +63,11 @@ public class CreateListingFragment extends Fragment {
 
         spinnerCategory = view.findViewById(R.id.spinner_category);
         spinnerCondition = view.findViewById(R.id.spinner_condition);
-        spinnerItemType = view.findViewById(R.id.spinner_item_type);
         spinnerFaculty = view.findViewById(R.id.spinner_faculty);
 
         setupDropdowns();
         setupDescriptionCounter();
 
-        tvCharCounter.setText(getString(R.string.char_counter_template, 0));
-
-        // CLEANER ALIGNED CALL: Matches standard SDK design patterns
         view.findViewById(R.id.card_add_photos).setOnClickListener(v ->
                 pickMedia.launch(new PickVisualMediaRequest.Builder()
                         .setMediaType(ActivityResultContracts.PickVisualMedia.ImageOnly.INSTANCE)
@@ -82,15 +80,9 @@ public class CreateListingFragment extends Fragment {
     }
 
     private void setupDropdowns() {
-        String[] categories = {"Select Category", "Electronics", "Books", "Clothes", "Bags", "Services"};
-        String[] conditions = {"Select Condition", "Brand New", "Like New", "Used"};
-        String[] itemTypes = {"Select Item Type", "Buy", "Rental"};
-        String[] faculties = {"Select Faculty", "Faculty of Computer Science", "Faculty of Engineering", "Faculty of Business"};
-
-        initSpinner(spinnerCategory, categories);
-        initSpinner(spinnerCondition, conditions);
-        initSpinner(spinnerItemType, itemTypes);
-        initSpinner(spinnerFaculty, faculties);
+        initSpinner(spinnerCategory, new String[]{"Select Category", "Electronics", "Books", "Clothes", "Bags", "Services"});
+        initSpinner(spinnerCondition, new String[]{"Select Condition", "Brand New", "Like New", "Used"});
+        initSpinner(spinnerFaculty, new String[]{"Select Faculty", "Faculty of Computer Science", "Faculty of Engineering", "Faculty of Business"});
     }
 
     private void initSpinner(Spinner spinner, String[] items) {
@@ -113,32 +105,40 @@ public class CreateListingFragment extends Fragment {
     }
 
     private void saveListingToDatabase() {
-        String title = etTitle.getText().toString().trim();
-        String priceStr = etPrice.getText().toString().trim();
-        String description = etDescription.getText().toString().trim();
+        SharedPreferences prefs = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String userEmail = prefs.getString("user_email", null);
 
-        String category = spinnerCategory.getSelectedItem().toString();
-        String condition = spinnerCondition.getSelectedItem().toString();
-
-        if (title.isEmpty() || priceStr.isEmpty() || description.isEmpty() || selectedImageUriStr.isEmpty() ||
-                spinnerCategory.getSelectedItemPosition() == 0 ||
-                spinnerCondition.getSelectedItemPosition() == 0 ||
-                spinnerItemType.getSelectedItemPosition() == 0 ||
-                spinnerFaculty.getSelectedItemPosition() == 0) {
-            Toast.makeText(getContext(), R.string.error_missing_fields, Toast.LENGTH_SHORT).show();
+        int sellerId = (userEmail != null) ? dbHelper.getStuIDByEmail(userEmail) : -1;
+        if (sellerId == -1) {
+            Toast.makeText(getContext(), "Session error: Please log in.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String finalPrice = "RM " + priceStr;
+        final String title = etTitle.getText().toString().trim();
+        final String priceInput = etPrice.getText().toString().trim();
+        final String description = etDescription.getText().toString().trim();
+        final String category = spinnerCategory.getSelectedItem().toString();
+        final String condition = spinnerCondition.getSelectedItem().toString();
+        final String faculty = spinnerFaculty.getSelectedItem().toString();
 
-        Listing newListing = new Listing(title, finalPrice, category, condition, selectedImageUriStr, description);
+        // Validation: Removed itemtype check
+        if (title.isEmpty() || priceInput.isEmpty() || description.isEmpty() || selectedImageUriStr.isEmpty() ||
+                spinnerCategory.getSelectedItemPosition() == 0 ||
+                spinnerCondition.getSelectedItemPosition() == 0 ||
+                spinnerFaculty.getSelectedItemPosition() == 0) {
+            Toast.makeText(getContext(), "Please fill in all fields correctly.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        try {
-            dbHelper.insertListing(newListing);
-            Toast.makeText(getContext(), R.string.success_listing_added, Toast.LENGTH_SHORT).show();
+        String finalPrice = priceInput.toUpperCase().startsWith("RM") ? priceInput : "RM " + priceInput;
+
+        Listing newListing = new Listing(title, finalPrice, category, condition, selectedImageUriStr, description, faculty, sellerId);
+
+        if (dbHelper.insertListing(newListing)) {
+            Toast.makeText(getContext(), "Listing added successfully!", Toast.LENGTH_SHORT).show();
             clearForm();
-        } catch (Exception e) {
-            Toast.makeText(getContext(), R.string.error_db_failed, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "Database error.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -151,7 +151,6 @@ public class CreateListingFragment extends Fragment {
         layoutPlaceholder.setVisibility(View.VISIBLE);
         spinnerCategory.setSelection(0);
         spinnerCondition.setSelection(0);
-        spinnerItemType.setSelection(0);
         spinnerFaculty.setSelection(0);
         tvCharCounter.setText(getString(R.string.char_counter_template, 0));
     }

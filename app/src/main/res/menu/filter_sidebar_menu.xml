@@ -1,21 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/filter_recommended"
-            android:icon="@android:drawable/btn_star_big_on"
-            android:title="Recommended" />
-        <item
-            android:id="@+id/filter_trending"
-            android:icon="@android:drawable/ic_menu_compass"
-            android:title="Hot Trending" />
-        <item
-            android:id="@+id/filter_top"
-            android:icon="@android:drawable/ic_menu_upload"
-            android:title="Top Items" />
-        <item
-            android:id="@+id/filter_rating"
-            android:icon="@android:drawable/btn_star_big_off"
-            android:title="Highest Rating" />
+        <item android:id="@+id/filter_all" android:title="All Categories" android:icon="@android:drawable/ic_menu_compass"/>
+        <item android:id="@+id/filter_electronics" android:title="Electronics" android:icon="@android:drawable/ic_menu_info_details"/>
+        <item android:id="@+id/filter_books" android:title="Books" android:icon="@android:drawable/ic_menu_agenda"/>
+        <item android:id="@+id/filter_clothes" android:title="Clothes" android:icon="@android:drawable/ic_menu_myplaces"/>
+        <item android:id="@+id/filter_bags" android:title="Bags" android:icon="@android:drawable/ic_menu_call"/>
+        <item android:id="@+id/filter_services" android:title="Services" android:icon="@android:drawable/ic_menu_preferences"/>
     </group>
 </menu>
