@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,6 +17,8 @@ import java.util.List;
 public class HomeExploreFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
+    private RecyclerView recyclerView;
+    private ListingAdapter adapter;
 
     @Nullable
     @Override
@@ -22,43 +26,83 @@ public class HomeExploreFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home_explore, container, false);
 
         dbHelper = new DatabaseHelper(getContext());
-
-        // 1. Initialize Greeting Text Component
         TextView tvGreetingTitle = view.findViewById(R.id.tv_greeting_title);
 
-        // 2. Safely capture session email from host activity login intent
         String loggedInEmail = null;
         if (getActivity() != null && getActivity().getIntent() != null) {
             loggedInEmail = getActivity().getIntent().getStringExtra("USER_EMAIL");
         }
 
-        // 3. Bind dynamic registered name or process Guest view mode status
-        String displayName;
-        if (loggedInEmail != null && !loggedInEmail.isEmpty()) {
-            displayName = dbHelper.getUserNameByEmail(loggedInEmail);
-        } else {
-            displayName = "Guest";
-        }
+        String displayName = (loggedInEmail != null && !loggedInEmail.isEmpty())
+                ? dbHelper.getUserNameByEmail(loggedInEmail) : "Guest";
 
         if (tvGreetingTitle != null) {
-            tvGreetingTitle.setText("Welcome Back,\n" + displayName + " 👋");
+            tvGreetingTitle.setText(String.format("Welcome Back,\n%s 👋", displayName));
         }
 
-        // 4. Bind catalog layout lists feed grid
-        RecyclerView recyclerView = view.findViewById(R.id.rv_explore_items);
+        recyclerView = view.findViewById(R.id.rv_explore_items);
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        List<Listing> campusItemsList = dbHelper.getAllListings();
+        // Check if this fragment was launched from another page with a pre-selected category filter
+        int preSelectedCategoryId = (getArguments() != null) ? getArguments().getInt("FILTER_CATEGORY_ID", -1) : -1;
 
+        if (preSelectedCategoryId != -1) {
+            filterMarketplaceCategory(preSelectedCategoryId);
+        } else {
+            loadDefaultData();
+        }
+
+        return view;
+    }
+
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (getActivity() != null) {
+            DrawerLayout drawerLayout = getActivity().findViewById(R.id.drawer_layout);
+            View btnOpenFiltersHome = view.findViewById(R.id.btn_open_filters_home);
+
+            if (btnOpenFiltersHome != null && drawerLayout != null) {
+                btnOpenFiltersHome.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+            }
+        }
+    }
+
+    private void loadDefaultData() {
+        List<Listing> campusItemsList = dbHelper.getAllListings();
         if (campusItemsList.isEmpty()) {
             insertInitialData();
             campusItemsList = dbHelper.getAllListings();
         }
-
-        ListingAdapter adapter = new ListingAdapter(campusItemsList);
+        adapter = new ListingAdapter(campusItemsList);
         recyclerView.setAdapter(adapter);
+    }
 
-        return view;
+    // Public method accessible by MainActivity to update the product feed immediately
+    public void filterMarketplaceCategory(int menuItemId) {
+        if (dbHelper == null) return;
+
+        List<Listing> filteredItemsList;
+        if (menuItemId == R.id.cat_all) {
+            filteredItemsList = dbHelper.getAllListings();
+        } else if (menuItemId == R.id.cat_electronics) {
+            filteredItemsList = dbHelper.getListingsByCategory("Electronics");
+        } else if (menuItemId == R.id.cat_books) {
+            filteredItemsList = dbHelper.getListingsByCategory("Books");
+        } else if (menuItemId == R.id.cat_clothes) {
+            filteredItemsList = dbHelper.getListingsByCategory("Clothes");
+        } else if (menuItemId == R.id.cat_bags) {
+            filteredItemsList = dbHelper.getListingsByCategory("Bags");
+        } else {
+            filteredItemsList = dbHelper.getAllListings();
+        }
+
+        adapter = new ListingAdapter(filteredItemsList);
+        if (recyclerView != null) {
+            recyclerView.setAdapter(adapter);
+        }
     }
 
     private void insertInitialData() {
