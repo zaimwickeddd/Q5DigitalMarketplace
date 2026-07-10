@@ -16,9 +16,8 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
     private List<Listing> listingsList;
     private DatabaseHelper dbHelper;
     private int currentUserId;
-    private OnListingActionListener actionListener; // Tracks item click events
+    private OnListingActionListener actionListener;
 
-    // FIXED: Correctly added the interface parameter into the constructor setup
     public ListingAdapter(List<Listing> listingsList, Context context, int currentUserId, OnListingActionListener actionListener) {
         this.listingsList = listingsList;
         this.dbHelper = new DatabaseHelper(context);
@@ -38,7 +37,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         Listing currentItem = listingsList.get(position);
         Context context = holder.itemView.getContext();
 
-        // Bind data fields to view holders
+        // Bind data fields securely
         if (holder.tvTitle != null && currentItem.getTitle() != null) {
             holder.tvTitle.setText(currentItem.getTitle());
         }
@@ -46,24 +45,23 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             holder.tvPrice.setText("RM " + currentItem.getPrice());
         }
 
-        // FIXED: Click listener to open details page when tapping anywhere on the card item
+        // Tap listener for full details viewing
         holder.itemView.setOnClickListener(v -> {
             if (actionListener != null) {
                 actionListener.onItemClick(currentItem);
             }
         });
 
-        // Check wishlist status from SQLite
+        // Sync visual star indicator safely via updated SQLite validation mapping
         boolean isFavorited = dbHelper.isWishlisted(currentUserId, currentItem.getId());
 
-        // Visually update the star icon based on database status
         if (isFavorited) {
             holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
         } else {
             holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
         }
 
-        // Handle favorite toggle taps
+        // Handle wishlist toggle click interactions
         holder.ivFavStar.setOnClickListener(v -> {
             if (dbHelper.isWishlisted(currentUserId, currentItem.getId())) {
                 dbHelper.removeFromWishlist(currentUserId, currentItem.getId());
@@ -84,19 +82,17 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
 
     public static class ListingViewHolder extends RecyclerView.ViewHolder {
         ImageView ivFavStar;
-        TextView tvTitle, tvPrice; // Handles card descriptive labels
+        TextView tvTitle, tvPrice;
 
         public ListingViewHolder(@NonNull View itemView) {
             super(itemView);
+            // REFINED: Safely bound against explicit target layout fields
             ivFavStar = itemView.findViewById(R.id.iv_fav_star);
-
-            // Adjust these IDs if they match alternative naming variants inside item_marketplace_card.xml
-            tvTitle = itemView.findViewById(R.id.tv_item_title);
+            tvTitle = itemView.findViewById(R.id.tv_title);
             tvPrice = itemView.findViewById(R.id.tv_price);
         }
     }
 
-    // --- FIXED: Formally declaring the listener interface structural bounds ---
     public interface OnListingActionListener {
         void onItemClick(Listing listing);
         void onEdit(Listing listing);
