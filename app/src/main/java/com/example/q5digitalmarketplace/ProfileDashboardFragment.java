@@ -32,14 +32,14 @@ public class ProfileDashboardFragment extends Fragment {
 
         loadProfileData();
 
-        // FIXED: Clear SharedPreferences session details completely on sign-out click
+        // 1. Clear SharedPreferences session details completely on sign-out click
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
             if (getActivity() != null) {
                 // Wipe the stored credentials block
                 SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
                 prefs.edit().clear().apply();
 
-                // Kick back to the Login screen safely (or WelcomeActivity if that's your starter gate)
+                // Kick back to the Login screen safely
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -47,14 +47,15 @@ public class ProfileDashboardFragment extends Fragment {
             }
         });
 
-        // Handle Account Settings navigation
+        // 2. Handle Account Settings navigation
         view.findViewById(R.id.rl_account_settings).setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new AccountSettingsFragment())
                     .addToBackStack(null)
                     .commit();
         });
-        // 🛠️ ADD THIS BLOCK TO MAKE MY LISTINGS BUTTON NAVIGATE TO YOUR ACTIVITY:
+
+        // 3. Make My Listings button navigate to your standalone Activity
         View rlMyListings = view.findViewById(R.id.rl_my_listings);
         if (rlMyListings != null) {
             rlMyListings.setOnClickListener(v -> {
@@ -66,13 +67,25 @@ public class ProfileDashboardFragment extends Fragment {
             });
         }
 
+        // 4. MERGED: Report & Analytics Navigation Click Handler
+        View rlAnalytics = view.findViewById(R.id.rl_analytics);
+        if (rlAnalytics != null) {
+            rlAnalytics.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    // Launch the AnalyticsActivity chart page dashboard smoothly
+                    Intent intent = new Intent(getActivity(), AnalyticsActivity.class);
+                    startActivity(intent);
+                }
+            });
+        }
+
         return view;
     }
 
     private void loadProfileData() {
         String loggedInEmail = null;
 
-        // FIXED: Read directly from the persistent file instead of a fragile intent string
+        // Read directly from the persistent file instead of a fragile intent string
         if (getActivity() != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
             loggedInEmail = prefs.getString("user_email", null);
@@ -82,8 +95,8 @@ public class ProfileDashboardFragment extends Fragment {
             // Query record row for the signed-in user
             Cursor cursor = dbHelper.getStudentProfileByEmail(loggedInEmail);
             if (cursor != null && cursor.moveToFirst()) {
-                tvName.setText(cursor.getString(0)); // Name
-                tvEmail.setText(cursor.getString(1)); // Email
+                tvName.setText(cursor.getString(1)); // Name (Index 1 matching updated DB helper query index positions)
+                tvEmail.setText(cursor.getString(2)); // Email (Index 2 matching updated DB helper query index positions)
                 cursor.close();
             } else {
                 // Fallback to name from Users table if Student record not found

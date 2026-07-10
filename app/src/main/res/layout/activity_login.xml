@@ -135,6 +135,15 @@
                 android:textColor="#38B6FF"
                 android:textSize="12sp"
                 android:textStyle="bold" />
+            <Button
+                android:id="@+id/btn_dev_bypass"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="12dp"
+                android:text="⚡ [DEV] Bypass Auth Gate"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#74777F"
+                android:textStyle="bold" />
         </LinearLayout>
 
     </LinearLayout>

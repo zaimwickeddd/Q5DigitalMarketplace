@@ -18,7 +18,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
     private int currentUserId;
     private OnListingActionListener actionListener; // Tracks item click events
 
-    // FIXED: Correctly added the interface parameter into the constructor setup
+    // Unified Constructor setup containing your full interface routing maps
     public ListingAdapter(List<Listing> listingsList, Context context, int currentUserId, OnListingActionListener actionListener) {
         this.listingsList = listingsList;
         this.dbHelper = new DatabaseHelper(context);
@@ -38,43 +38,62 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         Listing currentItem = listingsList.get(position);
         Context context = holder.itemView.getContext();
 
-        // Bind data fields to view holders
+        // 1. Bind Text Descriptive Fields safely
         if (holder.tvTitle != null && currentItem.getTitle() != null) {
             holder.tvTitle.setText(currentItem.getTitle());
         }
         if (holder.tvPrice != null && currentItem.getPrice() != null) {
             holder.tvPrice.setText("RM " + currentItem.getPrice());
         }
+        if (holder.tvCategoryTag != null && currentItem.getCategory() != null) {
+            holder.tvCategoryTag.setText(currentItem.getCategory());
+        }
 
-        // FIXED: Click listener to open details page when tapping anywhere on the card item
+        // 2. Dynamic Image Rendering Layer (Loads lenovo_laptop, mandarin_books, etc.)
+        if (holder.imgProduct != null && currentItem.getImagePath() != null) {
+            String imageName = currentItem.getImagePath();
+            int imageResId = context.getResources().getIdentifier(
+                    imageName, "drawable", context.getPackageName());
+
+            if (imageResId != 0) {
+                holder.imgProduct.setImageResource(imageResId);
+            } else {
+                // Fallback placeholder icon asset if specific resource name string isn't found
+                holder.imgProduct.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
+        }
+
+        // 3. Card Container Item Click Navigation Link Router
         holder.itemView.setOnClickListener(v -> {
             if (actionListener != null) {
                 actionListener.onItemClick(currentItem);
             }
         });
 
-        // Check wishlist status from SQLite
-        boolean isFavorited = dbHelper.isWishlisted(currentUserId, currentItem.getId());
+        // 4. Interactive Wishlist Star Persistence Logic
+        if (holder.ivFavStar != null) {
+            boolean isFavorited = dbHelper.isWishlisted(currentUserId, currentItem.getId());
 
-        // Visually update the star icon based on database status
-        if (isFavorited) {
-            holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
-        } else {
-            holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
-        }
-
-        // Handle favorite toggle taps
-        holder.ivFavStar.setOnClickListener(v -> {
-            if (dbHelper.isWishlisted(currentUserId, currentItem.getId())) {
-                dbHelper.removeFromWishlist(currentUserId, currentItem.getId());
-                holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
-                Toast.makeText(context, "Removed from Favorites", Toast.LENGTH_SHORT).show();
-            } else {
-                dbHelper.insertWishlist(currentUserId, currentItem.getId());
+            // Synchronize starting visual state with SQLite database records
+            if (isFavorited) {
                 holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
-                Toast.makeText(context, "Added to Favorites!", Toast.LENGTH_SHORT).show();
+            } else {
+                holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
             }
-        });
+
+            // Favorites quick toggle tap click click handler
+            holder.ivFavStar.setOnClickListener(v -> {
+                if (dbHelper.isWishlisted(currentUserId, currentItem.getId())) {
+                    dbHelper.removeFromWishlist(currentUserId, currentItem.getId());
+                    holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
+                    Toast.makeText(context, "Removed from Favorites", Toast.LENGTH_SHORT).show();
+                } else {
+                    dbHelper.insertWishlist(currentUserId, currentItem.getId());
+                    holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
+                    Toast.makeText(context, "Added to Favorites!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     @Override
@@ -82,21 +101,22 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         return listingsList.size();
     }
 
+    // ViewHolder class mapped precisely to your active item_marketplace_card XML tags
     public static class ListingViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivFavStar;
-        TextView tvTitle, tvPrice; // Handles card descriptive labels
+        ImageView ivFavStar, imgProduct;
+        TextView tvTitle, tvPrice, tvCategoryTag;
 
         public ListingViewHolder(@NonNull View itemView) {
             super(itemView);
             ivFavStar = itemView.findViewById(R.id.iv_fav_star);
-
-            // Adjust these IDs if they match alternative naming variants inside item_marketplace_card.xml
-            tvTitle = itemView.findViewById(R.id.tv_item_title);
+            imgProduct = itemView.findViewById(R.id.img_product);
+            tvTitle = itemView.findViewById(R.id.tv_title);
             tvPrice = itemView.findViewById(R.id.tv_price);
+            tvCategoryTag = itemView.findViewById(R.id.tv_category_tag);
         }
     }
 
-    // --- FIXED: Formally declaring the listener interface structural bounds ---
+    // Unified interface declarations supporting structural project requirements
     public interface OnListingActionListener {
         void onItemClick(Listing listing);
         void onEdit(Listing listing);
