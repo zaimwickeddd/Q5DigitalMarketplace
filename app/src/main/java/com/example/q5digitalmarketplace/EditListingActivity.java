@@ -1,5 +1,6 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -208,6 +209,10 @@ public class EditListingActivity extends AppCompatActivity {
             return;
         }
 
+        // CAROUSELL LOGIC ENGAGED: Check for modifications and trigger alerts BEFORE updating the DB row values
+        dbHelper.checkAndNotifyPriceChange(this, listingId, updatedPrice, updatedTitle);
+
+        // Commit updates down to SQLite
         boolean success = dbHelper.updateListing(listingId, updatedTitle, updatedPrice,
                 updatedCategory, updatedCondition, currentImagePath, updatedDescription, updatedFaculty, updatedType);
 

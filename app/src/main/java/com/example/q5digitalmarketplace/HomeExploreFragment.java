@@ -20,6 +20,7 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,21 +69,42 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         });
 
         // 3. Wrench Filter Button: Logic to open the navigation drawer
-        view.findViewById(R.id.btn_open_filters_home).setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).getDrawerLayout().openDrawer(GravityCompat.START);
-            }
-        });
+        View btnFilters = view.findViewById(R.id.btn_open_filters_home);
+        if (btnFilters != null) {
+            btnFilters.setOnClickListener(v -> {
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).getDrawerLayout().openDrawer(GravityCompat.START);
+                }
+            });
+        }
 
         // Logic Initialization
         setupUserGreeting();
         setupSearchLogic();
 
-        // UI Click Listeners
-        view.findViewById(R.id.iv_notif_bell).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show());
-        view.findViewById(R.id.iv_fav_star).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Favorites coming soon!", Toast.LENGTH_SHORT).show());
+        // UI Click Listeners with safe Null-Pointer checks to prevent app crashes
+        View ivNotifBell = view.findViewById(R.id.iv_notif_bell);
+        if (ivNotifBell != null) {
+            ivNotifBell.setOnClickListener(v ->
+                    Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show());
+        }
+
+        // FIXED: The top toolbar star icon now loads FavoritesFragment and syncs bottom navigation selection
+        View ivFavStar = view.findViewById(R.id.iv_fav_star);
+        if (ivFavStar != null) {
+            ivFavStar.setOnClickListener(v -> {
+                if (getActivity() != null) {
+                    // 1. Swap current container to the Favorites page fragment
+                    getActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new FavoritesFragment())
+                            .commit();
+
+                    // 2. Highlight the corresponding favorite tab in the Bottom Menu layout
+                    BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
+
+                }
+            });
+        }
 
         // Initial Data Load
         refreshDataCache();
@@ -107,14 +129,16 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     }
 
     private void setupSearchLogic() {
-        etSearchBar.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                currentSearchQuery = s.toString();
-                applyFilters(); // Re-filter on every keystroke
-            }
-            @Override public void afterTextChanged(Editable s) {}
-        });
+        if (etSearchBar != null) {
+            etSearchBar.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    currentSearchQuery = s.toString();
+                    applyFilters(); // Re-filter on every keystroke
+                }
+                @Override public void afterTextChanged(Editable s) {}
+            });
+        }
     }
 
     // Public method called by MainActivity/Sidebar
@@ -142,7 +166,6 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
             }
         }
 
-        // --- FIXED FOR STEP B MATCHING ---
         // 1. Get the current user email session from SharedPreferences
         String loggedInEmail = "";
         if (getActivity() != null) {
@@ -153,11 +176,10 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         // 2. Fetch the actual student ID row index integer
         int currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
 
-        // 3. Instantiated using the revised 3-argument constructor format
-        recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
-
-        // Note: If you updated your constructor to accept the click interface as a 4th argument, use this instead:
-        // recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
+        // 3. FIXED: Properly matching the updated 4-argument constructor signature cleanly
+        if (recyclerView != null) {
+            recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
+        }
     }
 
     private String getCategoryNameFromId(int filterId) {
@@ -170,7 +192,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     }
 
     private void setupUserGreeting() {
-        if (getActivity() == null) return;
+        if (getActivity() == null || tvGreetingTitle == null) return;
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String userName = dbHelper.getUserNameByEmail(prefs.getString("user_email", ""));
 

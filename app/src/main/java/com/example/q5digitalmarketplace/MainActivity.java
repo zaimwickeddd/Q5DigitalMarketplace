@@ -19,6 +19,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawerLayout;
 
+    // 1. Runtime system permission request system interface tracking registration node
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    Log.d("NotificationPerm", "Permission granted successfully");
+                } else {
+                    Toast.makeText(this, "Alerts disabled. Enable notifications in settings to track your favorites.", Toast.LENGTH_LONG).show();
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,20 +42,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setNavigationItemSelectedListener(this);
         }
 
+        // Initialize runtime push message permission requests for modern operating system compatibility layers
+        checkNotificationPermission();
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new HomeExploreFragment())
                     .commit();
         }
 
+        // FIXED: Complete mapping containing our new Favorites Fragment routing targets
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
 
-            if (itemId == R.id.nav_home) selectedFragment = new HomeExploreFragment();
-            else if (itemId == R.id.nav_explore_items) selectedFragment = new ExploreItemsFragment();
-            else if (itemId == R.id.nav_sell) selectedFragment = new CreateListingFragment();
-            else if (itemId == R.id.nav_profile) selectedFragment = new ProfileDashboardFragment();
+            if (itemId == R.id.nav_home) {
+                selectedFragment = new HomeExploreFragment();
+            } else if (itemId == R.id.nav_explore_items) {
+                selectedFragment = new ExploreItemsFragment();
+            } else if (itemId == R.id.nav_sell) {
+                selectedFragment = new CreateListingFragment();
+            } else if (itemId == R.id.nav_profile) {
+                selectedFragment = new ProfileDashboardFragment();
+            }
 
             if (selectedFragment != null) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
@@ -85,19 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return true;
     }
-    // 1. Declare the launcher at the top of your Activity/Fragment class level
-    private final ActivityResultLauncher<String> requestPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    // Permission granted! Your notification channel updates will fire perfectly.
-                    Log.d("NotificationPerm", "Permission granted successfully");
-                } else {
-                    // Permission denied. Inform the user gracefully that they'll miss out on item alerts.
-                    Toast.makeText(this, "Alerts disabled. Enable notifications in settings to track your favorites.", Toast.LENGTH_LONG).show();
-                }
-            });
 
-    // 2. Call this method inside onCreate() or when appropriate
+    // Verifies security criteria and requests explicit permission on Android 13+ devices
     private void checkNotificationPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this,

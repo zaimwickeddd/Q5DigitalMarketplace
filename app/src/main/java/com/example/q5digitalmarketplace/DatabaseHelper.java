@@ -401,5 +401,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         }
     }
+    // Notifies all tracking buyers if a seller reduces or changes an item's price
+    public void checkAndNotifyPriceChange(Context context, int itemId, String newPrice, String itemTitle) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // 1. Fetch the old price from the database first to compare
+        String oldPrice = "";
+        Cursor priceCursor = db.rawQuery("SELECT " + COLUMN_PRICE + " FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(itemId)});
+        if (priceCursor != null) {
+            if (priceCursor.moveToFirst()) {
+                oldPrice = priceCursor.getString(0);
+            }
+            priceCursor.close();
+        }
+
+        // 2. If the price actually changed, find everyone who wishlisted it
+        if (!oldPrice.isEmpty() && !oldPrice.equals(newPrice)) {
+            Cursor watcherCursor = db.rawQuery("SELECT BuyerID FROM Wishlist WHERE ItemID = ?", new String[]{String.valueOf(itemId)});
+            if (watcherCursor != null) {
+                if (watcherCursor.moveToFirst()) {
+                    do {
+                        sendLocalNotification(context,
+                                "Price drop alert! ",
+                                "An item in your Favorites (" + itemTitle + ") changed from RM " + oldPrice + " to RM " + newPrice + ".");
+                    } while (watcherCursor.moveToNext());
+                }
+                watcherCursor.close();
+            }
+        }
+    }
+    public List<Listing> getWishlistListings(int buyerId) {
+        List<Listing> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // SQL JOIN to pull complete listing details matching rows saved in the Wishlist table
+        String query = "SELECT l.* FROM " + TABLE_LISTINGS + " l " +
+                "JOIN Wishlist w ON l." + COLUMN_ID + " = w.ItemID " +
+                "WHERE w.BuyerID = ?";
+
+        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(buyerId)});
+
+        if (cursor.moveToFirst()) {
+            do {
+                list.add(new Listing(
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FACULTY)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
+                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SELLER_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow("status"))
+                ));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return list;
+    }
 }
 
