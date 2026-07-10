@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
     <application
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -21,22 +25,13 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".WelcomeActivity"
-            android:exported="false" />
-
+        <activity android:name=".WelcomeActivity" android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="true" />
-
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
-
-        <!-- Added SignupActivity declaration -->
-        <activity
-            android:name=".SignupActivity"
-            android:exported="false" />
+            android:windowSoftInputMode="adjustPan">
+        </activity>
+        <activity android:name=".LoginActivity" android:exported="false" />
+        <activity android:name=".SignupActivity" android:exported="false" />
 
         <activity
             android:name=".ListingDetailActivity"
@@ -45,6 +40,10 @@
 
         <activity
             android:name=".MyListingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".EditListingActivity"
             android:exported="false" />
 
     </application>

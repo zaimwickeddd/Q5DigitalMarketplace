@@ -2,8 +2,12 @@ package com.example.q5digitalmarketplace;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,9 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ListingDetailActivity extends AppCompatActivity {
 
+    private static final String TAG = "ListingDetailActivity";
     private DatabaseHelper dbHelper;
-    private String sellerPhone = "";
-    private String sellerName = "Active Seller";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,59 +36,104 @@ public class ListingDetailActivity extends AppCompatActivity {
         TextView specCategory = findViewById(R.id.spec_category);
         TextView specCondition = findViewById(R.id.spec_condition);
         TextView specFaculty = findViewById(R.id.spec_faculty);
+        TextView specType = findViewById(R.id.spec_type);
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        Bundle extras = getIntent().getExtras();
+        // FIXED: Converted fields to local variables to solve Android Studio lint warning
+        String sellerPhone = "";
+        String sellerName = "Active Seller";
 
-        // Final variables for lambda compliance
-        final String title;
-        final String price;
-        final String category;
-        final String condition;
-        final String faculty;
-        final String description;
-        final String imagePath;
+        // Initialize baseline local tracker variables
         int itemId = -1;
+        String title = "Item Name";
+        String price = "RM --";
+        String category = "General";
+        String condition = "Used";
+        String faculty = "General";
+        String type = "Buy";
+        String imagePath = "";
+        String description = "No description provided.";
 
-        if (extras != null) {
-            itemId = extras.getInt("id", -1);
-            title = extras.getString("title", "Item Name");
-            price = extras.getString("price", "RM --");
-            category = extras.getString("category", "General");
-            condition = extras.getString("condition", "Used");
-            faculty = extras.getString("faculty", "General");
-            imagePath = extras.getString("image_path", "");
-            description = extras.getString("description", "No description provided.");
+        // Extract the listing object sent by the HomeExploreFragment
+        Listing listing = (Listing) getIntent().getSerializableExtra("selected_listing");
+
+        if (listing != null) {
+            itemId = listing.getId();
+            title = listing.getTitle() != null ? listing.getTitle() : "Item Name";
+
+            // Format Price safely to eliminate potential "RM RM" display glitches
+            String rawPrice = String.valueOf(listing.getPrice()).trim();
+            if (rawPrice.toUpperCase().startsWith("RM")) {
+                price = rawPrice;
+            } else {
+                price = getString(R.string.price_format, rawPrice);
+            }
+
+            category = listing.getCategory() != null ? listing.getCategory() : "General";
+            condition = listing.getCondition() != null ? listing.getCondition() : "Used";
+            faculty = listing.getFaculty() != null ? listing.getFaculty() : "General";
+            imagePath = listing.getImagePath() != null ? listing.getImagePath() : "";
+            description = listing.getDescription() != null ? listing.getDescription() : "No description provided.";
+
+            // FIXED: Using listing.getType() which is the standard getter matching your model
+            type = listing.getType() != null ? listing.getType() : "Buy";
+
+            Log.d(TAG, "Successfully processed Object Item ID: " + itemId);
         } else {
-            title = "Item Name";
-            price = "RM --";
-            category = "General";
-            condition = "Used";
-            faculty = "General";
-            imagePath = "";
-            description = "No description provided.";
+            Log.w(TAG, "Object extra was null, checking for legacy key fallbacks...");
+            Bundle extras = getIntent().getExtras();
+            if (extras != null) {
+                itemId = extras.getInt("id", -1);
+                title = extras.getString("title", "Item Name");
+                price = extras.getString("price", "RM --");
+                category = extras.getString("category", "General");
+                condition = extras.getString("condition", "Used");
+                faculty = extras.getString("faculty", "General");
+                type = extras.getString("listing_type", "Buy");
+                imagePath = extras.getString("image_path", "");
+                description = extras.getString("description", "No description provided.");
+            }
         }
 
+        // Set UI Text Elements
         tvTitleMain.setText(title);
-        tvTitleTag.setText(category.toUpperCase());
+        tvTitleTag.setText(type.toUpperCase());
         tvPrice.setText(price);
         tvDescription.setText(description);
-
         specCategory.setText(category);
         specCondition.setText(condition);
         specFaculty.setText(faculty);
+        if (specType != null) specType.setText(type);
 
-        if (imagePath != null && !imagePath.isEmpty()) {
-            try {
-                imgMain.setImageURI(Uri.parse(imagePath));
-            } catch (Exception e) {
+        // Process Database Image Strings safely
+        if (imgMain != null) {
+            if (imagePath != null && !imagePath.trim().isEmpty()) {
+                String cleanImg = imagePath.trim();
+                try {
+                    if (cleanImg.startsWith("content://") || cleanImg.startsWith("file://") || cleanImg.startsWith("/")) {
+                        imgMain.setImageURI(Uri.parse(cleanImg));
+                    } else {
+                        if (cleanImg.contains(",")) {
+                            cleanImg = cleanImg.substring(cleanImg.indexOf(",") + 1);
+                        }
+                        byte[] decodedBytes = Base64.decode(cleanImg, Base64.DEFAULT);
+                        Bitmap decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                        if (decodedBitmap != null) {
+                            imgMain.setImageBitmap(decodedBitmap);
+                        } else {
+                            imgMain.setImageResource(android.R.drawable.ic_menu_gallery);
+                        }
+                    }
+                } catch (Exception e) {
+                    imgMain.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
+            } else {
                 imgMain.setImageResource(android.R.drawable.ic_menu_gallery);
             }
-        } else {
-            imgMain.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
+        // Fetch Seller Info from SQLite via database layer queries
         if (itemId != -1) {
             Cursor cursor = dbHelper.getListingWithSellerPhone(itemId);
             if (cursor != null) {
@@ -93,32 +141,36 @@ public class ListingDetailActivity extends AppCompatActivity {
                     int nameIndex = cursor.getColumnIndex("Name");
                     int phoneIndex = cursor.getColumnIndex("PhoneNum");
 
-                    if (nameIndex != -1) {
-                        sellerName = cursor.getString(nameIndex);
-                        if (tvSellerName != null) tvSellerName.setText(sellerName);
-                    }
+                    if (nameIndex != -1) sellerName = cursor.getString(nameIndex);
+                    if (phoneIndex != -1) sellerPhone = cursor.getString(phoneIndex);
 
-                    if (phoneIndex != -1) {
-                        sellerPhone = cursor.getString(phoneIndex);
-                    }
+                    if (tvSellerName != null) tvSellerName.setText(sellerName);
+                    Log.d(TAG, "Seller found: " + sellerName + " | Phone: " + sellerPhone);
+                } else {
+                    Log.e(TAG, "Cursor empty for Item ID: " + itemId);
                 }
                 cursor.close();
             }
         }
 
-        // WhatsApp Deep Linking Action
+        // WhatsApp Intent Action Integration
+        final String finalTitle = title;
+        final String finalType = type;
+        final String finalSellerName = sellerName;
+        final String finalSellerPhone = sellerPhone;
+
         findViewById(R.id.btn_whatsapp).setOnClickListener(v -> {
-            if (sellerPhone != null && !sellerPhone.trim().isEmpty()) {
-                String cleanNumber = sellerPhone.replaceAll("[\\s+\\-]", "");
+            if (finalSellerPhone != null && !finalSellerPhone.trim().isEmpty()) {
+                String cleanNumber = finalSellerPhone.replaceAll("[^0-9]", "");
                 if (cleanNumber.startsWith("0")) cleanNumber = "6" + cleanNumber;
 
-                String messageBody = "Hello " + sellerName + "! I saw your listing for '" + title + "' on the student marketplace.";
+                String messageBody = "Hello " + finalSellerName + "! I am interested in your " + finalType + " listing: '" + finalTitle + "'.";
                 String apiUri = "https://wa.me/" + cleanNumber + "?text=" + Uri.encode(messageBody);
 
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(apiUri)));
                 } catch (Exception e) {
-                    Toast.makeText(this, "Unable to launch WhatsApp.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "WhatsApp not installed.", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Toast.makeText(this, "Seller phone number not found.", Toast.LENGTH_SHORT).show();

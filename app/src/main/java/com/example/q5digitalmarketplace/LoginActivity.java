@@ -7,10 +7,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
-import android.widget.TextView;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,6 +31,16 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 1. Session Persistence Check: Skip login screen if user is already authenticated
+        SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        if (prefs.contains("user_email") && !prefs.getString("user_email", "").isEmpty()) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+            return; // Halt further initialization of this layout instance
+        }
+
         setContentView(R.layout.activity_login);
 
         dbHelper = new DatabaseHelper(this);
@@ -60,8 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                         btnLogin.setEnabled(true);
 
                         if (isValid) {
-                            // Save email to SharedPreferences for use in fragments
-                            SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+                            // 2. Commit authenticated identity profile session down to storage
                             prefs.edit().putString("user_email", email).apply();
 
                             showToast("Login Successful");

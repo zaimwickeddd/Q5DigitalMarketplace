@@ -19,11 +19,12 @@ import com.google.android.material.navigation.NavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExploreItemsFragment extends Fragment {
+public class ExploreItemsFragment extends Fragment implements ListingAdapter.OnListingActionListener {
 
     private DatabaseHelper dbHelper;
     private DrawerLayout drawerLayout;
     private ListingAdapter adapter;
+    private EditText etSearchBar;
 
     private final List<Listing> masterList = new ArrayList<>();
     private final List<Listing> activeFilteredList = new ArrayList<>();
@@ -37,44 +38,36 @@ public class ExploreItemsFragment extends Fragment {
 
         dbHelper = new DatabaseHelper(getContext());
         drawerLayout = view.findViewById(R.id.explore_drawer_layout);
-
-        EditText etSearchBar = view.findViewById(R.id.et_search_bar);
-
+        etSearchBar = view.findViewById(R.id.et_search_bar);
         RecyclerView recyclerView = view.findViewById(R.id.rv_explore_items_list);
+
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        masterList.clear();
-        masterList.addAll(dbHelper.getAllListings());
-
-        activeFilteredList.clear();
-        activeFilteredList.addAll(masterList);
-
-        adapter = new ListingAdapter(activeFilteredList);
+        // Initialize Adapter with the filtered list reference
+        adapter = new ListingAdapter(activeFilteredList, this);
         recyclerView.setAdapter(adapter);
-
-        // UPDATED: Now forwards primary and foreign key IDs to fetch WhatsApp details accurately
-        adapter.setOnItemClickListener(listing -> {
-            Intent intent = new Intent(getContext(), ListingDetailActivity.class);
-            intent.putExtra("id", listing.getId()); // Crucial for looking up phone data via SQL Join
-            intent.putExtra("title", listing.getTitle());
-            intent.putExtra("price", listing.getCardPrice());
-            intent.putExtra("category", listing.getCategory());
-            intent.putExtra("condition", listing.getCondition());
-            intent.putExtra("image_path", listing.getImagePath());
-            intent.putExtra("description", listing.getDescription());
-            intent.putExtra("seller_id", listing.getSellerId());
-            startActivity(intent);
-        });
 
         view.findViewById(R.id.btn_open_filters).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
 
-        setupTextSearchWatcher(etSearchBar);
+        setupTextSearchWatcher();
         setupSidebarMenuSelectionFilters(view);
 
         return view;
     }
 
-    private void setupTextSearchWatcher(EditText etSearchBar) {
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshData();
+    }
+
+    private void refreshData() {
+        masterList.clear();
+        masterList.addAll(dbHelper.getAllListings());
+        applyCombinedSearchFilters();
+    }
+
+    private void setupTextSearchWatcher() {
         etSearchBar.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -92,19 +85,12 @@ public class ExploreItemsFragment extends Fragment {
         filterSidebar.setNavigationItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
-            if (itemId == R.id.filter_all) {
-                selectedCategoryFilter = "All";
-            } else if (itemId == R.id.filter_electronics) {
-                selectedCategoryFilter = "Electronics";
-            } else if (itemId == R.id.filter_books) {
-                selectedCategoryFilter = "Books";
-            } else if (itemId == R.id.filter_clothes) {
-                selectedCategoryFilter = "Clothes";
-            } else if (itemId == R.id.filter_bags) {
-                selectedCategoryFilter = "Bags";
-            } else if (itemId == R.id.filter_services) {
-                selectedCategoryFilter = "Services";
-            }
+            if (itemId == R.id.filter_all) selectedCategoryFilter = "All";
+            else if (itemId == R.id.filter_electronics) selectedCategoryFilter = "Electronics";
+            else if (itemId == R.id.filter_books) selectedCategoryFilter = "Books";
+            else if (itemId == R.id.filter_clothes) selectedCategoryFilter = "Clothes";
+            else if (itemId == R.id.filter_bags) selectedCategoryFilter = "Bags";
+            else if (itemId == R.id.filter_services) selectedCategoryFilter = "Services";
 
             applyCombinedSearchFilters();
             drawerLayout.closeDrawer(GravityCompat.END);
@@ -112,12 +98,7 @@ public class ExploreItemsFragment extends Fragment {
         });
     }
 
-    @SuppressWarnings("NotifyDataSetChanged")
     private void applyCombinedSearchFilters() {
-        View view = getView();
-        if (view == null) return;
-
-        EditText etSearchBar = view.findViewById(R.id.et_search_bar);
         String keyword = etSearchBar.getText().toString().trim().toLowerCase();
         activeFilteredList.clear();
 
@@ -130,7 +111,23 @@ public class ExploreItemsFragment extends Fragment {
                 activeFilteredList.add(item);
             }
         }
-
+        // Notify the adapter that the data inside the list has changed
         adapter.notifyDataSetChanged();
     }
+
+    // FIXED: Navigation logic resides here in the Fragment
+    @Override
+    public void onItemClick(Listing listing) {
+        if (getContext() == null || listing == null) return;
+
+        // Start the Detail Activity and pass the serializable Listing object
+        Intent intent = new Intent(getContext(), ListingDetailActivity.class);
+        intent.putExtra("selected_listing", listing);
+        startActivity(intent);
+    }
+
+    // Unused interface methods kept for interface compliance
+    @Override public void onEdit(Listing listing) {}
+    @Override public void onDelete(Listing listing) {}
+    @Override public void onMarkSold(Listing listing) {}
 }

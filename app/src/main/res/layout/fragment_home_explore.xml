@@ -6,33 +6,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F9FC"
-    android:padding="16dp"
-    android:fitsSystemWindows="true"> <TextView
-    android:id="@+id/tv_brand_logo"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="@string/home_label"
-    android:textSize="22sp"
-    android:textStyle="bold"
-    android:textColor="#1A1C1E"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent" />
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tv_brand_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/home_label"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#1A1C1E"
+        app:layout_constraintTop_toTopOf="@id/btn_open_filters_home"
+        app:layout_constraintBottom_toBottomOf="@id/btn_open_filters_home"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Explore" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/btn_open_filters_home"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        app:cardCornerRadius="24dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        app:cardCornerRadius="22dp"
         app:cardBackgroundColor="#38BDF8"
-        app:strokeWidth="0dp"
         app:cardElevation="2dp"
         android:clickable="true"
         android:focusable="true"
+        android:foreground="?android:attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_gravity="center"
             android:src="@android:drawable/ic_menu_manage"
@@ -45,9 +48,14 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
+        android:padding="4dp"
         android:src="@android:drawable/btn_star_big_off"
         android:contentDescription="@string/favorites_desc"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="#64748B"
+        app:layout_constraintTop_toTopOf="@id/btn_open_filters_home"
         app:layout_constraintBottom_toBottomOf="@id/btn_open_filters_home"
         app:layout_constraintEnd_toStartOf="@id/btn_open_filters_home" />
 
@@ -56,9 +64,14 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:layout_marginEnd="8dp"
+        android:padding="4dp"
         android:src="@android:drawable/ic_popup_reminder"
         android:contentDescription="@string/notifications_desc"
-        app:layout_constraintTop_toTopOf="parent"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="#64748B"
+        app:layout_constraintTop_toTopOf="@id/btn_open_filters_home"
         app:layout_constraintBottom_toBottomOf="@id/btn_open_filters_home"
         app:layout_constraintEnd_toStartOf="@id/iv_fav_star" />
 
@@ -69,7 +82,7 @@
         android:layout_marginTop="16dp"
         app:cardCornerRadius="25dp"
         app:cardElevation="2dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_brand_logo"
+        app:layout_constraintTop_toBottomOf="@id/btn_open_filters_home"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -84,7 +97,8 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:src="@android:drawable/ic_menu_search"
-                android:contentDescription="@string/search_icon_desc" />
+                android:contentDescription="@string/search_icon_desc"
+                app:tint="#94A3B8"/>
 
             <EditText
                 android:id="@+id/search_bar"
@@ -96,26 +110,34 @@
                 android:importantForAutofill="no"
                 android:inputType="text"
                 android:layout_marginStart="8dp"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:textColor="#1E293B"
+                android:textColorHint="#94A3B8"
+                tools:ignore="LabelFor" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/tv_greeting_title"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="@string/welcome_back"
+        android:layout_marginEnd="16dp"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#1A1C1E"
+        android:maxLines="2"
+        android:ellipsize="end"
         app:layout_constraintTop_toBottomOf="@id/cv_search_wrapper"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cv_profile_avatar"
+        tools:text="Welcome Back,\nKarl" />
 
     <TextView
         android:id="@+id/tv_subtitle_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:text="@string/view_all_items"
         android:textColor="#74777F"
         android:textSize="14sp"
@@ -124,28 +146,32 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_profile_avatar"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_marginTop="20dp"
-        app:cardCornerRadius="30dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        app:cardCornerRadius="28dp"
         app:cardBackgroundColor="#E0E2EC"
-        app:layout_constraintTop_toBottomOf="@id/cv_search_wrapper"
+        app:cardElevation="1dp"
+        app:layout_constraintTop_toTopOf="@id/tv_greeting_title"
+        app:layout_constraintBottom_toBottomOf="@id/tv_subtitle_hint"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@android:drawable/ic_menu_report_image"
+            android:src="@android:drawable/ic_menu_gallery"
             android:scaleType="centerCrop"
-            android:contentDescription="@string/user_avatar_desc" />
+            android:contentDescription="@string/user_avatar_desc"
+            app:tint="#64748B"/>
     </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_explore_items"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:scrollbars="vertical"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/tv_subtitle_hint"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

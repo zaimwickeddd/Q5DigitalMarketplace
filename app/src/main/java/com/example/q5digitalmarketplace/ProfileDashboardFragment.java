@@ -75,4 +75,7 @@ public class ProfileDashboardFragment extends Fragment {
         // Assuming your wishlist count is global or also filtered by user
         tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
     }
+
+
+
 }

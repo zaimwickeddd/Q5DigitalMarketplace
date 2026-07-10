@@ -1,5 +1,9 @@
 <resources>
     <string name="app_name">Q5DigitalMarketplace</string>
+    <string name="welcome_back">Welcome Back,\n%1$s</string>
+    <string name="welcome_guest">Welcome Back,\nGuest!</string>
+    <string name="price_format">RM %1$s</string>
+    <string name="no_title">No Title Available</string>
     <string name="nav_explore">Explore</string>
     <string name="nav_sell">Sell</string>
     <string name="nav_favourites">Favourites</string>
@@ -22,11 +26,20 @@
     <string name="notifications_desc">Notifications</string>
     <string name="favorites_desc">Favorites</string>
     <string name="search_icon_desc">Search Icon</string>
-    <string name="welcome_back">Welcome Back,</string>
     <string name="view_all_items">View all available items</string>
     <string name="user_avatar_desc">User Avatar</string>
 
     <string name="filter_recommended">Recommended</string>
     <string name="filter_trending">Trending</string>
     <string name="filter_icon_desc">Filter Items</string>
+
+    <string name="my_listings">My Listings</string>
+    <string name="all">All</string>
+    <string name="active">Active</string>
+    <string name="sold">Sold</string>
+    <string name="no_listings_yet">No listings yet</string>
+    <string name="create_listing">Create Listing</string>
+    <string name="empty_list_icon">Empty list icon</string>
+
+    <string name="save_changes">Save Changes</string>
 </resources>
