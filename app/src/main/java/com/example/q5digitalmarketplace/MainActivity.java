@@ -1,7 +1,12 @@
 package com.example.q5digitalmarketplace;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
@@ -79,5 +84,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawerLayout.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+    // 1. Declare the launcher at the top of your Activity/Fragment class level
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // Permission granted! Your notification channel updates will fire perfectly.
+                    Log.d("NotificationPerm", "Permission granted successfully");
+                } else {
+                    // Permission denied. Inform the user gracefully that they'll miss out on item alerts.
+                    Toast.makeText(this, "Alerts disabled. Enable notifications in settings to track your favorites.", Toast.LENGTH_LONG).show();
+                }
+            });
+
+    // 2. Call this method inside onCreate() or when appropriate
+    private void checkNotificationPermission() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this,
+                    android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+
+                // Trigger the system request dialog box prompt
+                requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
+            }
+        }
     }
 }
