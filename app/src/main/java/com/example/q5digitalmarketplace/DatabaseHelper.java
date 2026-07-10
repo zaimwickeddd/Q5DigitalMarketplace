@@ -268,10 +268,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return list;
     }
+    public Cursor getStudentProfileByEmail(String email) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.query("Student",
+                new String[]{"Name", "Email", "PhoneNum", "UserType"},
+                "Email=?",
+                new String[]{email}, null, null, null);
+    }
+
+    public boolean updateStudentProfile(String email, String name, String phone) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Name", name);
+        values.put("PhoneNum", phone);
+        int result = db.update("Student", values, "Email=?", new String[]{email});
+        db.close();
+        return result > 0;
+    }
+
+    public boolean updateStudentPassword(String email, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Password", newPassword);
+        int result = db.update("Student", values, "Email=?", new String[]{email});
+        db.close();
+        return result > 0;
+    }
 
     public List<Listing> getListingsBySellerIdAndStatus(int sellerId, String status) {
         String query = "SELECT * FROM " + TABLE_LISTINGS +
                 " WHERE " + COLUMN_SELLER_ID + " = ? AND status = ?";
         return fetchListings(query, new String[]{String.valueOf(sellerId), status});
     }
+    public int getListingsCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS, null);
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+        return count;
+    }
 }
+
