@@ -23,8 +23,8 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/btn_open_filters_home"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         app:cardCornerRadius="22dp"
         app:cardBackgroundColor="#38BDF8"
         app:cardElevation="2dp"
@@ -45,8 +45,8 @@
 
     <ImageView
         android:id="@+id/iv_fav_star"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:padding="4dp"
         android:src="@android:drawable/btn_star_big_off"
@@ -61,8 +61,8 @@
 
     <ImageView
         android:id="@+id/iv_notif_bell"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginEnd="8dp"
         android:padding="4dp"
         android:src="@android:drawable/ic_popup_reminder"

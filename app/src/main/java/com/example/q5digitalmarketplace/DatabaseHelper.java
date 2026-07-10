@@ -314,5 +314,92 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return count;
     }
+
+    // Check if the item is already favorited by this user
+    public boolean isWishlisted(int buyerId, int itemId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM Wishlist WHERE BuyerID = ? AND ItemID = ?",
+                new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
+        boolean exists = cursor.getCount() > 0;
+        cursor.close();
+        return exists;
+    }
+
+    // Remove item from wishlist
+    public boolean removeFromWishlist(int buyerId, int itemId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int result = db.delete("Wishlist", "BuyerID = ? AND ItemID = ?",
+                new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
+        return result > 0;
+    }
+
+    // --- Wishlist & Notification Operations ---
+
+    // FIXED: Resolves the 'insertWishlist' compilation error in ListingAdapter
+    public boolean insertWishlist(int buyerId, int itemId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("BuyerID", buyerId);
+        values.put("ItemID", itemId);
+
+        // Dynamically add today's date
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String currentDate = sdf.format(new java.util.Date());
+        values.put("Date_Added", currentDate);
+
+        long result = db.insert("Wishlist", null, values);
+        db.close();
+        return result != -1;
+    }
+
+    // Advanced Operation: Marks an item as sold and triggers local notifications for watchers
+    public void markItemAsSold(Context context, int itemId, String itemTitle) {
+        // 1. Update the item's status in the database to 'Sold'
+        updateListingStatus(itemId, "Sold");
+
+        // 2. Query all buyers who added this specific item to their wishlist
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT BuyerID FROM Wishlist WHERE ItemID = ?", new String[]{String.valueOf(itemId)});
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    // Send a system channel update for every user tracking the item
+                    sendLocalNotification(context,
+                            "An item in your Favorites has been sold!",
+                            itemTitle + " is no longer available.");
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+    }
+
+    // Local System Tray Notification Builder Utility
+    private void sendLocalNotification(Context context, String title, String message) {
+        String channelId = "item_updates_channel";
+        android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                    channelId, "Campus Marketplace Updates",
+                    android.app.NotificationManager.IMPORTANCE_DEFAULT);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+        androidx.core.app.NotificationCompat.Builder builder =
+                new androidx.core.app.NotificationCompat.Builder(context, channelId)
+                        .setSmallIcon(android.R.drawable.stat_notify_chat)
+                        .setContentTitle(title)
+                        .setContentText(message)
+                        .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
+                        .setAutoCancel(true);
+
+        if (notificationManager != null) {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
+    }
 }
 

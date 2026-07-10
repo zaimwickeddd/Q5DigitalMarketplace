@@ -142,8 +142,22 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
             }
         }
 
-        // Update adapter with the result of the combined filter
-        recyclerView.setAdapter(new ListingAdapter(filteredList, this));
+        // --- FIXED FOR STEP B MATCHING ---
+        // 1. Get the current user email session from SharedPreferences
+        String loggedInEmail = "";
+        if (getActivity() != null) {
+            SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+            loggedInEmail = prefs.getString("user_email", "");
+        }
+
+        // 2. Fetch the actual student ID row index integer
+        int currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
+
+        // 3. Instantiated using the revised 3-argument constructor format
+        recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
+
+        // Note: If you updated your constructor to accept the click interface as a 4th argument, use this instead:
+        // recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
     }
 
     private String getCategoryNameFromId(int filterId) {
@@ -168,6 +182,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         }
     }
 
+    // ListingAdapter Click Listeners
     @Override
     public void onItemClick(Listing listing) {
         if (getContext() == null || listing == null) return;

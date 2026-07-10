@@ -1,6 +1,8 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -43,8 +45,13 @@ public class ExploreItemsFragment extends Fragment implements ListingAdapter.OnL
 
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
 
-        // Initialize Adapter with the filtered list reference
-        adapter = new ListingAdapter(activeFilteredList, this);
+        // 1. Fetch current user session details to comply with updated adapter contract requirements
+        SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String loggedInEmail = prefs.getString("user_email", "");
+        int currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
+
+        // FIXED: Initialized adapter with all 4 required parameters
+        adapter = new ListingAdapter(activeFilteredList, getContext(), currentUserId, this);
         recyclerView.setAdapter(adapter);
 
         view.findViewById(R.id.btn_open_filters).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.END));
@@ -103,30 +110,31 @@ public class ExploreItemsFragment extends Fragment implements ListingAdapter.OnL
         activeFilteredList.clear();
 
         for (Listing item : masterList) {
-            boolean matchesSearchText = item.getTitle().toLowerCase().contains(keyword);
+            boolean matchesSearchText = item.getTitle() != null && item.getTitle().toLowerCase().contains(keyword);
             boolean matchesCategorySelection = selectedCategoryFilter.equals("All") ||
-                    item.getCategory().equalsIgnoreCase(selectedCategoryFilter);
+                    (item.getCategory() != null && item.getCategory().equalsIgnoreCase(selectedCategoryFilter));
 
             if (matchesSearchText && matchesCategorySelection) {
                 activeFilteredList.add(item);
             }
         }
-        // Notify the adapter that the data inside the list has changed
-        adapter.notifyDataSetChanged();
+
+        // Notify changes safely
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
 
-    // FIXED: Navigation logic resides here in the Fragment
     @Override
     public void onItemClick(Listing listing) {
         if (getContext() == null || listing == null) return;
 
-        // Start the Detail Activity and pass the serializable Listing object
         Intent intent = new Intent(getContext(), ListingDetailActivity.class);
         intent.putExtra("selected_listing", listing);
         startActivity(intent);
     }
 
-    // Unused interface methods kept for interface compliance
+    // Unused interface methods kept for structural compliance
     @Override public void onEdit(Listing listing) {}
     @Override public void onDelete(Listing listing) {}
     @Override public void onMarkSold(Listing listing) {}
