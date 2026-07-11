@@ -7,7 +7,8 @@
     android:orientation="vertical"
     android:background="#121212"
     android:padding="20dp"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    tools:context=".AnalyticsActivity">
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,6 +26,7 @@
         android:textColor="#9CA3AF"
         android:layout_marginBottom="24dp"/>
 
+    <!-- 🛠️ FIXED: Added dark theme overlay to force dynamic text elements to default to light/white color profiles -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -33,7 +35,8 @@
         app:cardCornerRadius="16dp"
         app:cardElevation="0dp"
         app:strokeColor="#2A2A35"
-        app:strokeWidth="1dp">
+        app:strokeWidth="1dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -60,6 +63,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
+                    <!-- Dynamic container for category bar chart rows -->
                     <LinearLayout
                         android:id="@+id/layoutBarsList"
                         android:layout_width="match_parent"
@@ -96,6 +100,7 @@
                         android:layout_height="220dp"
                         android:layout_gravity="center_horizontal" />
 
+                    <!-- Dynamic container for chart legend items -->
                     <LinearLayout
                         android:id="@+id/layoutPieLegend"
                         android:layout_width="match_parent"

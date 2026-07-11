@@ -8,8 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList; // 🛠️ ADDED
-import java.util.List;      // 🛠️ ADDED
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnalyticsActivity extends AppCompatActivity {
 
@@ -33,10 +33,10 @@ public class AnalyticsActivity extends AppCompatActivity {
         // 1. Render the Horizontal Bar Chart (WhatsApp click metrics)
         renderCategoryChart();
 
-        // 2. 🛠️ CALLED: Render the Pie Chart (Listing distribution metrics)
+        // 2. Render the Pie Chart (Listing distribution metrics)
         renderPieChartDistribution();
 
-        // 3. 🛠️ ADDED: Setup back button action router navigation rule
+        // 3. Setup back button action router navigation rule
         findViewById(R.id.btn_back_analytics).setOnClickListener(v -> {
             finish(); // Closes this activity window and pops back to the Profile tab screen cleanly
         });
@@ -74,7 +74,9 @@ public class AnalyticsActivity extends AppCompatActivity {
             // Text label: e.g., "Electronics (45 clicks)"
             TextView tvLabel = new TextView(this);
             tvLabel.setText(categoryName + " (" + totalCategoryClicks + " clicks)");
-            tvLabel.setTextColor(Color.parseColor("#1A1C1E"));
+
+            // 🛠️ FIXED: Changed from dark "#1A1C1E" to light "#F9FAFB" for complete visibility
+            tvLabel.setTextColor(Color.parseColor("#F9FAFB"));
             tvLabel.setTextSize(14);
             rowContainer.addView(tvLabel);
 
@@ -141,8 +143,10 @@ public class AnalyticsActivity extends AppCompatActivity {
             // Label details text
             TextView tvLegend = new TextView(this);
             tvLegend.setText(category + ": " + itemCount + " items total");
-            tvLegend.setTextColor(Color.parseColor("#1A1C1E"));
-            tvLegend.setTextSize(13); // 🛠️ FIXED: Removed 'sp' suffix compiler bug
+
+            // 🛠️ FIXED: Changed from dark "#1A1C1E" to light "#F9FAFB" for complete visibility
+            tvLegend.setTextColor(Color.parseColor("#F9FAFB"));
+            tvLegend.setTextSize(13);
             legendItem.addView(tvLegend);
 
             layoutPieLegend.addView(legendItem);

@@ -529,4 +529,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return result > 0;
     }
+
+    public boolean updateStudentProfileImage(String email, String imagePath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // 🛠️ Updates ONLY the ProfileImage column for this specific student email row
+        values.put("ProfileImage", imagePath);
+
+        int result = db.update("Student", values, "Email=?", new String[]{email});
+        db.close();
+        return result > 0;
+    }
 }

@@ -18,8 +18,9 @@ import androidx.fragment.app.Fragment;
 public class ProfileDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
-    private TextView tvName, tvEmail, tvListings, tvFavourites;
-    private ImageView ivProfileImage; // Tracks user profile custom avatars
+    private TextView tvName, tvEmail, tvListings, tvFavourites, tvInitial;
+    private ImageView ivProfileImage;
+    private View btnEditProfile;
 
     @Nullable
     @Override
@@ -28,23 +29,33 @@ public class ProfileDashboardFragment extends Fragment {
 
         dbHelper = new DatabaseHelper(getContext());
 
-        // Initialize UI component bindings
+        // Initialize UI component resource bindings
         ivProfileImage = view.findViewById(R.id.iv_profile_image);
         tvName = view.findViewById(R.id.tv_profile_name);
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvListings = view.findViewById(R.id.tv_count_listings);
         tvFavourites = view.findViewById(R.id.tv_count_favourites);
+        tvInitial = view.findViewById(R.id.tv_profile_initial);
+        btnEditProfile = view.findViewById(R.id.btn_edit_profile);
 
         loadProfileData();
 
-        // 1. Clear SharedPreferences session details completely on sign-out click
+        // 1. 🛠️ CORRECTED ROUTE: Pencil Button opens the Dark Theme Edit Profile page
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new EditProfileFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
+
+        // 2. Clear SharedPreferences session details completely on sign-out click
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
             if (getActivity() != null) {
-                // Wipe the stored credentials block
                 SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
                 prefs.edit().clear().apply();
 
-                // Kick back to the Login screen safely
                 Intent intent = new Intent(getActivity(), LoginActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
@@ -52,7 +63,7 @@ public class ProfileDashboardFragment extends Fragment {
             }
         });
 
-        // 2. Handle Account Settings navigation redirection routing rules
+        // 3. Main Account Settings Menu Row (Routes to the White Theme Settings page)
         view.findViewById(R.id.rl_account_settings).setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new AccountSettingsFragment())
@@ -60,35 +71,33 @@ public class ProfileDashboardFragment extends Fragment {
                     .commit();
         });
 
-        // 3. Make My Listings button navigate to your standalone Activity
+        // 4. Make My Listings button navigate to your standalone Activity
         View rlMyListings = view.findViewById(R.id.rl_my_listings);
         if (rlMyListings != null) {
             rlMyListings.setOnClickListener(v -> {
                 if (getActivity() != null) {
-                    // Launch the MyListingsActivity screen using a clean Intent wrapper
                     Intent intent = new Intent(getActivity(), MyListingsActivity.class);
                     startActivity(intent);
                 }
             });
         }
 
-        // 4. My Favourites Fragment Navigation Action Mapping
+        // 5. My Favourites Fragment Navigation Action Mapping
         View rlMyFavourites = view.findViewById(R.id.rl_my_favourites);
         if (rlMyFavourites != null) {
             rlMyFavourites.setOnClickListener(v -> {
                 getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new FavoritesFragment()) // Routes into bookmarks list view container page
+                        .replace(R.id.fragment_container, new FavoritesFragment())
                         .addToBackStack(null)
                         .commit();
             });
         }
 
-        // 5. Report & Analytics Navigation Click Handler
+        // 6. Report & Analytics Navigation Click Handler
         View rlAnalytics = view.findViewById(R.id.rl_analytics);
         if (rlAnalytics != null) {
             rlAnalytics.setOnClickListener(v -> {
                 if (getActivity() != null) {
-                    // Launch the AnalyticsActivity chart page dashboard smoothly
                     Intent intent = new Intent(getActivity(), AnalyticsActivity.class);
                     startActivity(intent);
                 }
@@ -98,51 +107,80 @@ public class ProfileDashboardFragment extends Fragment {
         return view;
     }
 
+    // 🛠️ ADDED: Refresh profile updates and mock metric metrics whenever returning to this tab viewport area
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfileData();
+    }
+
     private void loadProfileData() {
         String loggedInEmail = null;
 
-        // Read directly from the persistent file instead of a fragile intent string
         if (getActivity() != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
             loggedInEmail = prefs.getString("user_email", null);
         }
 
         if (loggedInEmail != null && !loggedInEmail.isEmpty()) {
+            int userId = dbHelper.getStuIDByEmail(loggedInEmail);
+
             // Query record row for the signed-in user
             Cursor cursor = dbHelper.getStudentProfileByEmail(loggedInEmail);
             if (cursor != null && cursor.moveToFirst()) {
-                tvName.setText(cursor.getString(1)); // Name (Index 1 matching updated DB helper query index positions)
-                tvEmail.setText(cursor.getString(2)); // Email (Index 2 matching updated DB helper query index positions)
+                String name = cursor.getString(1);
+                String email = cursor.getString(2);
+                String imgPath = cursor.getString(5); // ProfileImage URL path index location
 
-                // Detect and load user profile image paths dynamically
-                String imgPath = cursor.getString(5); // ProfileImage index location
-                if (imgPath != null && !imgPath.trim().isEmpty() && ivProfileImage != null) {
-                    ivProfileImage.setImageURI(Uri.parse(imgPath));
-                } else if (ivProfileImage != null) {
-                    // Fallback to stock placeholder asset vector profile drawable frame
-                    ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                tvName.setText(name);
+                tvEmail.setText(email);
+
+                // Toggle visibility between custom avatar image frame and text letter initial block
+                if (imgPath != null && !imgPath.trim().isEmpty()) {
+                    if (ivProfileImage != null) {
+                        ivProfileImage.setImageURI(Uri.parse(imgPath));
+                        ivProfileImage.setVisibility(View.VISIBLE);
+                    }
+                    if (tvInitial != null) tvInitial.setVisibility(View.GONE);
+                } else {
+                    if (ivProfileImage != null) ivProfileImage.setVisibility(View.GONE);
+                    if (name != null && !name.isEmpty() && tvInitial != null) {
+                        tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                        tvInitial.setVisibility(View.VISIBLE);
+                    }
                 }
                 cursor.close();
             } else {
-                // Fallback to name from Users table if Student record not found
+                // Fallback to name from Users table if Student record row is missing
                 String username = dbHelper.getUserNameByEmail(loggedInEmail);
                 tvName.setText(username);
                 tvEmail.setText(loggedInEmail);
-                if (ivProfileImage != null) {
-                    ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                if (ivProfileImage != null) ivProfileImage.setVisibility(View.GONE);
+                if (username != null && !username.isEmpty() && tvInitial != null) {
+                    tvInitial.setText(String.valueOf(username.charAt(0)).toUpperCase());
+                    tvInitial.setVisibility(View.VISIBLE);
                 }
             }
+
+            // Pull active dynamic user contextual counts safely using indexed IDs
+            if (userId != -1) {
+                tvListings.setText(String.valueOf(dbHelper.getMyListingsCount(userId)));
+                tvFavourites.setText(String.valueOf(dbHelper.getWishlistListings(userId).size()));
+            } else {
+                tvListings.setText(String.valueOf(dbHelper.getListingsCount()));
+                tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
+            }
         } else {
-            // Fallback default placeholder info for Guest or missing session
+            // Fallback placeholder defaults for Guest or invalid session profiles
             tvName.setText("Guest User");
             tvEmail.setText("Not signed in");
-            if (ivProfileImage != null) {
-                ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+            tvListings.setText("0");
+            tvFavourites.setText("0");
+            if (ivProfileImage != null) ivProfileImage.setVisibility(View.GONE);
+            if (tvInitial != null) {
+                tvInitial.setText("G");
+                tvInitial.setVisibility(View.VISIBLE);
             }
         }
-
-        // Pull active contextual dynamic transaction counts
-        tvListings.setText(String.valueOf(dbHelper.getListingsCount()));
-        tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
     }
 }

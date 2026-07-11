@@ -72,7 +72,8 @@
             app:cardBackgroundColor="@color/bg_settings_icon"
             app:cardElevation="0dp"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:visibility="gone">
             <ImageView
                 android:layout_width="18dp"
                 android:layout_height="18dp"
