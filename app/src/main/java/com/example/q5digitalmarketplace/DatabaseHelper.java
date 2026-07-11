@@ -12,9 +12,17 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 20; // 🛠️ BUMPED VERSION TO FORCE SCHEMA REFRESH
+    private static final int DATABASE_VERSION = 21; // 🛠️ BUMPED VERSION FOR PROFILE IMAGE
 
     public static final String TABLE_LISTINGS = "listings";
+    public static final String COLUMN_STU_ID = "StuID";
+    public static final String COLUMN_STU_NAME = "Name";
+    public static final String COLUMN_STU_EMAIL = "Email";
+    public static final String COLUMN_STU_PHONE = "PhoneNum";
+    public static final String COLUMN_STU_PASSWORD = "Password";
+    public static final String COLUMN_STU_TYPE = "UserType";
+    public static final String COLUMN_STU_IMAGE = "ProfileImage";
+
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_PRICE = "price";
@@ -25,7 +33,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_FACULTY = "faculty";
     public static final String COLUMN_SELLER_ID = "seller_id";
     public static final String COLUMN_TYPE = "listing_type";
-    public static final String COLUMN_WHATSAPP_CLICKS = "whatsapp_clicks"; // 🛠️ ADDED CONSTANT
+    public static final String COLUMN_WHATSAPP_CLICKS = "whatsapp_clicks";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -33,7 +41,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE Student (StuID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Email TEXT UNIQUE, PhoneNum TEXT, Password TEXT, UserType TEXT);");
+        db.execSQL("CREATE TABLE Student (" + COLUMN_STU_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 
+                + COLUMN_STU_NAME + " TEXT, " + COLUMN_STU_EMAIL + " TEXT UNIQUE, " 
+                + COLUMN_STU_PHONE + " TEXT, " + COLUMN_STU_PASSWORD + " TEXT, " 
+                + COLUMN_STU_TYPE + " TEXT, " + COLUMN_STU_IMAGE + " TEXT);");
 
         // 🛠️ UPDATED TABLE SCHEMA TO INCLUDE CLICKS AND CORRECT COMMA PLACEMENT BEFORE FOREIGN KEY
         db.execSQL("CREATE TABLE " + TABLE_LISTINGS + "("
@@ -217,10 +228,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{String.valueOf(userId)});
     }
 
-    public int getWishlistCount() {
+    public int getWishlistCount(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
         int count = 0;
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Wishlist", null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Wishlist WHERE BuyerID = ?", new String[]{String.valueOf(userId)});
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 count = cursor.getInt(0);
@@ -273,9 +284,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor getStudentProfileByEmail(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.query("Student",
-                new String[]{"StuID", "Name", "Email", "PhoneNum", "UserType"}, // Ensure Index 0 is StuID, 1 is Name, 2 is Email
-                "Email=?",
+                new String[]{COLUMN_STU_ID, COLUMN_STU_NAME, COLUMN_STU_EMAIL, COLUMN_STU_PHONE, COLUMN_STU_TYPE, COLUMN_STU_IMAGE},
+                COLUMN_STU_EMAIL + "=?",
                 new String[]{email}, null, null, null);
+    }
+
+    public boolean updateStudentProfileImage(String email, String imagePath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_STU_IMAGE, imagePath);
+        int result = db.update("Student", values, COLUMN_STU_EMAIL + "=?", new String[]{email});
+        db.close();
+        return result > 0;
     }
 
     public boolean updateStudentProfile(String email, String name, String phone) {
@@ -303,10 +323,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return fetchListings(query, new String[]{String.valueOf(sellerId), status});
     }
 
-    public int getListingsCount() {
+    public int getListingsCount(int sellerId) {
         SQLiteDatabase db = this.getReadableDatabase();
         int count = 0;
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS, null);
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_SELLER_ID + " = ?", new String[]{String.valueOf(sellerId)});
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 count = cursor.getInt(0);

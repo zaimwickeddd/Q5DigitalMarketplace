@@ -40,20 +40,15 @@ public class FavoritesFragment extends Fragment implements ListingAdapter.OnList
             currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
         }
 
-        // 2. Setup Responsive Grid View matching Home screen layout dimensions
-        int screenWidthDp = getResources().getConfiguration().screenWidthDp;
-        int spanCount = (screenWidthDp >= 600) ? 3 : 2;
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
+        // 2. Setup Single Column Vertical List matching modernized layout theme
+        recyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
 
-        // 3. Grid Spacing Decorator
-        int spacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        // 3. Spacing Decorator for list items
+        int spacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, getResources().getDisplayMetrics());
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.left = spacing / 2;
-                outRect.right = spacing / 2;
                 outRect.bottom = spacing;
-                if (parent.getChildAdapterPosition(view) < spanCount) outRect.top = spacing;
             }
         });
 

@@ -1,8 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="blue_primary">#38B6FF</color>
-    <color name="bg_light">#F0F4F8</color>
-    <color name="gray_text">#757575</color>
+    <color name="colorBackground">#121212</color>
+    <color name="colorSurface">#1E1E2A</color>
+    <color name="colorSurfaceVariant">#2A2A35</color>
+
+    <color name="colorPrimary">#06B6D4</color>
+    <color name="colorSecondary">#EC4899</color>
+
+    <color name="textColorPrimary">#F9FAFB</color>
+    <color name="textColorSecondary">#9CA3AF</color>
+
+    <!-- Category Tints -->
+    <color name="tint_blue_bg">#E0F2FE</color>
+    <color name="tint_blue_text">#0369A1</color>
+    <color name="tint_purple_bg">#F3E8FF</color>
+    <color name="tint_purple_text">#7E22CE</color>
+    <color name="tint_amber_bg">#FEF3C7</color>
+    <color name="tint_amber_text">#B45309</color>
+
+    <!-- Top Bar Icon Backgrounds -->
+    <color name="bg_notif_icon">#1E293B</color> <!-- Soft blue-tinted dark -->
+    <color name="bg_fav_icon">#3F1E1E</color>   <!-- Soft red-tinted dark -->
+    <color name="bg_settings_icon">#2A2A35</color> <!-- Neutral gray -->
+
+    <color name="whatsapp_green">#25D366</color>
 </resources>

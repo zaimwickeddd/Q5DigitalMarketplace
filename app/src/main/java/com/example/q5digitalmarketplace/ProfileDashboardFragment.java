@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,7 +17,9 @@ import androidx.fragment.app.Fragment;
 public class ProfileDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
-    private TextView tvName, tvEmail, tvListings, tvFavourites;
+    private TextView tvName, tvEmail, tvListings, tvFavourites, tvInitial;
+    private ImageView imgAvatar;
+    private View btnEditProfile;
 
     @Nullable
     @Override
@@ -29,8 +32,20 @@ public class ProfileDashboardFragment extends Fragment {
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvListings = view.findViewById(R.id.tv_count_listings);
         tvFavourites = view.findViewById(R.id.tv_count_favourites);
+        tvInitial = view.findViewById(R.id.tv_profile_initial);
+        imgAvatar = view.findViewById(R.id.img_profile_avatar);
+        btnEditProfile = view.findViewById(R.id.btn_edit_profile);
 
         loadProfileData();
+
+        if (btnEditProfile != null) {
+            btnEditProfile.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new EditProfileFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         // 1. Clear SharedPreferences session details completely on sign-out click
         view.findViewById(R.id.btn_sign_out).setOnClickListener(v -> {
@@ -54,6 +69,17 @@ public class ProfileDashboardFragment extends Fragment {
                     .addToBackStack(null)
                     .commit();
         });
+
+        // Handle Favorites navigation
+        View rlMyFavourites = view.findViewById(R.id.rl_my_favourites);
+        if (rlMyFavourites != null) {
+            rlMyFavourites.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new FavoritesFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         // 3. Make My Listings button navigate to your standalone Activity
         View rlMyListings = view.findViewById(R.id.rl_my_listings);
@@ -82,6 +108,12 @@ public class ProfileDashboardFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfileData();
+    }
+
     private void loadProfileData() {
         String loggedInEmail = null;
 
@@ -92,26 +124,47 @@ public class ProfileDashboardFragment extends Fragment {
         }
 
         if (loggedInEmail != null && !loggedInEmail.isEmpty()) {
+            int userId = dbHelper.getStuIDByEmail(loggedInEmail);
+
             // Query record row for the signed-in user
             Cursor cursor = dbHelper.getStudentProfileByEmail(loggedInEmail);
             if (cursor != null && cursor.moveToFirst()) {
-                tvName.setText(cursor.getString(1)); // Name (Index 1 matching updated DB helper query index positions)
-                tvEmail.setText(cursor.getString(2)); // Email (Index 2 matching updated DB helper query index positions)
+                String name = cursor.getString(1);
+                String email = cursor.getString(2);
+                String imagePath = cursor.getString(5);
+
+                tvName.setText(name); 
+                tvEmail.setText(email); 
+
+                if (imagePath != null && !imagePath.isEmpty()) {
+                    imgAvatar.setImageURI(android.net.Uri.parse(imagePath));
+                    imgAvatar.setVisibility(View.VISIBLE);
+                    tvInitial.setVisibility(View.GONE);
+                } else if (name != null && !name.isEmpty() && tvInitial != null) {
+                    tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                    imgAvatar.setVisibility(View.GONE);
+                    tvInitial.setVisibility(View.VISIBLE);
+                }
                 cursor.close();
             } else {
                 // Fallback to name from Users table if Student record not found
                 String username = dbHelper.getUserNameByEmail(loggedInEmail);
                 tvName.setText(username);
                 tvEmail.setText(loggedInEmail);
+                if (username != null && !username.isEmpty() && tvInitial != null) {
+                    tvInitial.setText(String.valueOf(username.charAt(0)).toUpperCase());
+                }
             }
+
+            // Pull active contextual dynamic transaction counts
+            tvListings.setText(String.valueOf(dbHelper.getListingsCount(userId)));
+            tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount(userId)));
         } else {
             // Fallback default placeholder info for Guest or missing session
             tvName.setText("Guest User");
             tvEmail.setText("Not signed in");
+            tvListings.setText("0");
+            tvFavourites.setText("0");
         }
-
-        // Pull active contextual dynamic transaction counts
-        tvListings.setText(String.valueOf(dbHelper.getListingsCount()));
-        tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount()));
     }
 }

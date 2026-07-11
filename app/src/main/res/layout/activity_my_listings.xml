@@ -4,28 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="#121212">
 
-    <RelativeLayout
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:padding="16dp"
-        android:background="@android:color/white">
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#1E1E2A"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="4dp"
+        app:strokeWidth="0dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/my_listings"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:layout_centerInParent="true" />
-    </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:paddingHorizontal="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/my_listings"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:layout_centerInParent="true" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#1E1E2A"
+        app:tabTextColor="#9CA3AF"
+        app:tabSelectedTextColor="#06B6D4"
+        app:tabIndicatorColor="#06B6D4"
         app:tabMode="fixed"
         app:tabGravity="fill">
 
@@ -50,19 +62,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="10dp"
+        android:paddingVertical="12dp"
         android:gravity="center_vertical"
-        android:background="#F8FAFC">
+        android:background="#121212">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="46dp"
             android:layout_weight="1"
-            app:cardCornerRadius="22dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
-            app:strokeColor="#E2E8F0"
+            app:strokeColor="#2A2A35"
             app:strokeWidth="1dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="#1E1E2A">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -75,7 +87,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@android:drawable/ic_menu_search"
-                    app:tint="#64748B"/>
+                    app:tint="#9CA3AF"/>
 
                 <EditText
                     android:id="@+id/et_search_bar"
@@ -84,7 +96,7 @@
                     android:background="@android:color/transparent"
                     android:hint="Search your listings..."
                     android:textColorHint="#94A3B8"
-                    android:textColor="#1E293B"
+                    android:textColor="#FFFFFF"
                     android:textSize="14sp"
                     android:paddingStart="8dp"
                     android:paddingEnd="4dp"
@@ -96,12 +108,12 @@
 
         <ImageButton
             android:id="@+id/btn_filter_list"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
             android:layout_marginStart="10dp"
             android:src="@android:drawable/ic_menu_manage"
             android:background="?attr/selectableItemBackgroundBorderless"
-            app:tint="#1E293B"
+            app:tint="#06B6D4"
             android:contentDescription="Filter Options"/>
     </LinearLayout>
 
@@ -127,7 +139,7 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:src="@android:drawable/ic_menu_agenda"
-                android:alpha="0.5" />
+                app:tint="#2A2A35" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -135,13 +147,16 @@
                 android:text="@string/no_listings_yet"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:textColor="#9CA3AF"
                 android:layout_marginTop="16dp" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_create_listing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/create_listing"
+                app:backgroundTint="#06B6D4"
+                android:textColor="#121212"
                 android:layout_marginTop="20dp" />
         </LinearLayout>
     </FrameLayout>
