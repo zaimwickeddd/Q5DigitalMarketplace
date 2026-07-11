@@ -1,5 +1,6 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -40,11 +41,10 @@ public class ListingDetailActivity extends AppCompatActivity {
 
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        // FIXED: Converted fields to local variables to solve Android Studio lint warning
+        // Baseline tracking data variables
         String sellerPhone = "";
         String sellerName = "Active Seller";
 
-        // Initialize baseline local tracker variables
         int itemId = -1;
         String title = "Item Name";
         String price = "RM --";
@@ -75,8 +75,6 @@ public class ListingDetailActivity extends AppCompatActivity {
             faculty = listing.getFaculty() != null ? listing.getFaculty() : "General";
             imagePath = listing.getImagePath() != null ? listing.getImagePath() : "";
             description = listing.getDescription() != null ? listing.getDescription() : "No description provided.";
-
-            // FIXED: Using listing.getType() which is the standard getter matching your model
             type = listing.getType() != null ? listing.getType() : "Buy";
 
             Log.d(TAG, "Successfully processed Object Item ID: " + itemId);
@@ -111,9 +109,19 @@ public class ListingDetailActivity extends AppCompatActivity {
             if (imagePath != null && !imagePath.trim().isEmpty()) {
                 String cleanImg = imagePath.trim();
                 try {
-                    if (cleanImg.startsWith("content://") || cleanImg.startsWith("file://") || cleanImg.startsWith("/")) {
+                    // 🛠️ 1. CHECK FOR SEEDED DRAWABLE ASSET STRINGS FIRST (e.g., "lenovo_laptop")
+                    int imageResId = getResources().getIdentifier(cleanImg, "drawable", getPackageName());
+
+                    if (imageResId != 0) {
+                        // Resource found in res/drawable folder, load it directly
+                        imgMain.setImageResource(imageResId);
+                    }
+                    // 2. FALLBACK TO URI PATH IDENTIFIERS (Gallery uploads)
+                    else if (cleanImg.startsWith("content://") || cleanImg.startsWith("file://") || cleanImg.startsWith("/")) {
                         imgMain.setImageURI(Uri.parse(cleanImg));
-                    } else {
+                    }
+                    // 3. FALLBACK TO BASE64 DECODING SCHEMES
+                    else {
                         if (cleanImg.contains(",")) {
                             cleanImg = cleanImg.substring(cleanImg.indexOf(",") + 1);
                         }
@@ -126,6 +134,7 @@ public class ListingDetailActivity extends AppCompatActivity {
                         }
                     }
                 } catch (Exception e) {
+                    Log.e(TAG, "Error rendering image asset path", e);
                     imgMain.setImageResource(android.R.drawable.ic_menu_gallery);
                 }
             } else {
@@ -153,13 +162,20 @@ public class ListingDetailActivity extends AppCompatActivity {
             }
         }
 
-        // WhatsApp Intent Action Integration
+        // Prepare final variable bounds for inner lambda use
+        final int finalItemId = itemId;
         final String finalTitle = title;
         final String finalType = type;
         final String finalSellerName = sellerName;
         final String finalSellerPhone = sellerPhone;
 
+        // WhatsApp Intent Action Integration
         findViewById(R.id.btn_whatsapp).setOnClickListener(v -> {
+            // 🛠️ INTEGRATION: Log the WhatsApp tap click counter metrics directly to SQLite
+            if (finalItemId != -1) {
+                dbHelper.incrementWhatsAppClicks(finalItemId);
+            }
+
             if (finalSellerPhone != null && !finalSellerPhone.trim().isEmpty()) {
                 String cleanNumber = finalSellerPhone.replaceAll("[^0-9]", "");
                 if (cleanNumber.startsWith("0")) cleanNumber = "6" + cleanNumber;

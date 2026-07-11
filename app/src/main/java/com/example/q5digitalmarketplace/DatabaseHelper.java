@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 20; // 🛠️ BUMPED VERSION TO FORCE SCHEMA REFRESH
+    private static final int DATABASE_VERSION = 21; // 🛠️ Locked at Version 21 to support profile image features
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";
@@ -25,7 +25,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_FACULTY = "faculty";
     public static final String COLUMN_SELLER_ID = "seller_id";
     public static final String COLUMN_TYPE = "listing_type";
-    public static final String COLUMN_WHATSAPP_CLICKS = "whatsapp_clicks"; // 🛠️ ADDED CONSTANT
+    public static final String COLUMN_WHATSAPP_CLICKS = "whatsapp_clicks";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -33,31 +33,65 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE Student (StuID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Email TEXT UNIQUE, PhoneNum TEXT, Password TEXT, UserType TEXT);");
+        // 1. Create Student Table with Profile Image field properties
+        db.execSQL("CREATE TABLE IF NOT EXISTS Student (" +
+                "StuID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "Name TEXT, " +
+                "Email TEXT UNIQUE, " +
+                "PhoneNum TEXT, " +
+                "Password TEXT, " +
+                "UserType TEXT, " +
+                "ProfileImage TEXT);");
 
-        // 🛠️ UPDATED TABLE SCHEMA TO INCLUDE CLICKS AND CORRECT COMMA PLACEMENT BEFORE FOREIGN KEY
-        db.execSQL("CREATE TABLE " + TABLE_LISTINGS + "("
-                + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + COLUMN_TITLE + " TEXT, " + COLUMN_PRICE + " TEXT, " + COLUMN_CATEGORY + " TEXT, "
-                + COLUMN_CONDITION + " TEXT, " + COLUMN_IMAGE_RES + " TEXT, " + COLUMN_DESCRIPTION + " TEXT, "
-                + COLUMN_FACULTY + " TEXT, " + COLUMN_SELLER_ID + " INTEGER, status TEXT, " + COLUMN_TYPE + " TEXT, "
-                + COLUMN_WHATSAPP_CLICKS + " INTEGER DEFAULT 0, "
-                + "FOREIGN KEY(" + COLUMN_SELLER_ID + ") REFERENCES Student(StuID));");
+        // 2. Create Marketplace Item Listings Table with analytics tracker bounds
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_LISTINGS + "(" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_TITLE + " TEXT, " +
+                COLUMN_PRICE + " TEXT, " +
+                COLUMN_CATEGORY + " TEXT, " +
+                COLUMN_CONDITION + " TEXT, " +
+                COLUMN_IMAGE_RES + " TEXT, " +
+                COLUMN_DESCRIPTION + " TEXT, " +
+                COLUMN_FACULTY + " TEXT, " +
+                COLUMN_SELLER_ID + " INTEGER, " +
+                "status TEXT, " +
+                COLUMN_TYPE + " TEXT, " +
+                COLUMN_WHATSAPP_CLICKS + " INTEGER DEFAULT 0, " +
+                "FOREIGN KEY(" + COLUMN_SELLER_ID + ") REFERENCES Student(StuID));");
 
-        db.execSQL("CREATE TABLE Buyer (BuyerID INTEGER PRIMARY KEY, BuyerBio TEXT, Date_Joined TEXT, FOREIGN KEY(BuyerID) REFERENCES Student(StuID));");
-        db.execSQL("CREATE TABLE Seller (SellerID INTEGER PRIMARY KEY, StoreBio TEXT, FOREIGN KEY(SellerID) REFERENCES Student(StuID));");
-        db.execSQL("CREATE TABLE Wishlist (WishListID INTEGER PRIMARY KEY AUTOINCREMENT, Date_Added TEXT, BuyerID INTEGER, ItemID INTEGER, FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));");
+        // 3. Create Buyer Profile Sub-table bounds
+        db.execSQL("CREATE TABLE IF NOT EXISTS Buyer (" +
+                "BuyerID INTEGER PRIMARY KEY, " +
+                "BuyerBio TEXT, " +
+                "Date_Joined TEXT, " +
+                "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));");
 
-        // 🛠️ AUTOMATICALLY SEED THE 4 ITEMS ON CREATION
+        // 4. Create Seller Profile Sub-table bounds
+        db.execSQL("CREATE TABLE IF NOT EXISTS Seller (" +
+                "SellerID INTEGER PRIMARY KEY, " +
+                "StoreBio TEXT, " +
+                "FOREIGN KEY(SellerID) REFERENCES Student(StuID));");
+
+        // 5. Create Wishlist Relational Junction table framework
+        db.execSQL("CREATE TABLE IF NOT EXISTS Wishlist (" +
+                "WishListID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "Date_Added TEXT, " +
+                "BuyerID INTEGER, " +
+                "ItemID INTEGER, " +
+                "FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), " +
+                "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));");
+
+        // Seed default mock catalog dataset records on database instantiation
         insertMockData(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
+        // Tables dropped from child dependencies to parents to ensure integrity constraints drop cleanly
         db.execSQL("DROP TABLE IF EXISTS Wishlist");
         db.execSQL("DROP TABLE IF EXISTS Seller");
         db.execSQL("DROP TABLE IF EXISTS Buyer");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
         db.execSQL("DROP TABLE IF EXISTS Student");
         onCreate(db);
     }
@@ -110,9 +144,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public List<Listing> getAllListings() { return fetchListings("SELECT * FROM " + TABLE_LISTINGS, null); }
-    public List<Listing> getListingsByCategory(String category) { return fetchListings("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_CATEGORY + " = ?", new String[]{category}); }
-    public List<Listing> getListingsBySellerId(int sellerId) { return fetchListings("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_SELLER_ID + " = ?", new String[]{String.valueOf(sellerId)}); }
+    public List<Listing> getAllListings() {
+        return fetchListings("SELECT * FROM " + TABLE_LISTINGS, null);
+    }
+
+    public List<Listing> getListingsByCategory(String category) {
+        return fetchListings("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_CATEGORY + " = ?", new String[]{category});
+    }
+
+    public List<Listing> getListingsBySellerId(int sellerId) {
+        return fetchListings("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_SELLER_ID + " = ?", new String[]{String.valueOf(sellerId)});
+    }
+
     public Listing getListingById(int id) {
         List<Listing> list = fetchListings("SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
         return list.isEmpty() ? null : list.get(0);
@@ -176,9 +219,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public boolean updateListing(int id, String title, String price, String category,
-                                 String condition, String imagePath, String description,
-                                 String faculty, String type) {
+    public boolean updateListing(int id, String title, String price, String category, String condition, String imagePath, String description, String faculty, String type) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, title);
@@ -197,9 +238,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getListingWithSellerPhone(int itemId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT l.*, s.Name, s.PhoneNum FROM " + TABLE_LISTINGS + " l " +
-                "JOIN Student s ON l." + COLUMN_SELLER_ID + " = s.StuID " +
-                "WHERE l." + COLUMN_ID + " = ?";
+        String query = "SELECT l.*, s.Name, s.PhoneNum FROM " + TABLE_LISTINGS + " l " + "JOIN Student s ON l." + COLUMN_SELLER_ID + " = s.StuID " + "WHERE l." + COLUMN_ID + " = ?";
         return db.rawQuery(query, new String[]{String.valueOf(itemId)});
     }
 
@@ -213,8 +252,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getStudentProfile(int userId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT Name, Email FROM Student WHERE StuID = ?",
-                new String[]{String.valueOf(userId)});
+        return db.rawQuery("SELECT Name, Email FROM Student WHERE StuID = ?", new String[]{String.valueOf(userId)});
     }
 
     public int getWishlistCount() {
@@ -241,7 +279,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int priceIdx = cursor.getColumnIndex("price");
             int catIdx = cursor.getColumnIndex("category");
             int condIdx = cursor.getColumnIndex("condition");
-            int imgIdx = cursor.getColumnIndex("image_resource_id"); // Sync with actual column name constant string variable
+            int imgIdx = cursor.getColumnIndex("image_resource_id");
             int descIdx = cursor.getColumnIndex("description");
             int facIdx = cursor.getColumnIndex("faculty");
             int typeIdx = cursor.getColumnIndex("listing_type");
@@ -249,19 +287,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int statusIdx = cursor.getColumnIndex("status");
 
             do {
-                Listing l = new Listing(
-                        cursor.getInt(idIdx),
-                        cursor.getString(titleIdx),
-                        cursor.getString(priceIdx),
-                        cursor.getString(catIdx),
-                        cursor.getString(condIdx),
-                        cursor.getString(imgIdx),
-                        cursor.getString(descIdx),
-                        cursor.getString(facIdx),
-                        cursor.getString(typeIdx),
-                        cursor.getInt(sellerIdx),
-                        cursor.getString(statusIdx)
-                );
+                Listing l = new Listing(cursor.getInt(idIdx), cursor.getString(titleIdx), cursor.getString(priceIdx), cursor.getString(catIdx), cursor.getString(condIdx), cursor.getString(imgIdx), cursor.getString(descIdx), cursor.getString(facIdx), cursor.getString(typeIdx), cursor.getInt(sellerIdx), cursor.getString(statusIdx));
                 list.add(l);
             } while (cursor.moveToNext());
         }
@@ -272,10 +298,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getStudentProfileByEmail(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.query("Student",
-                new String[]{"StuID", "Name", "Email", "PhoneNum", "UserType"}, // Ensure Index 0 is StuID, 1 is Name, 2 is Email
-                "Email=?",
-                new String[]{email}, null, null, null);
+        return db.query("Student", new String[]{"StuID", "Name", "Email", "PhoneNum", "UserType", "ProfileImage"},
+                "Email=?", new String[]{email}, null, null, null);
     }
 
     public boolean updateStudentProfile(String email, String name, String phone) {
@@ -298,8 +322,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public List<Listing> getListingsBySellerIdAndStatus(int sellerId, String status) {
-        String query = "SELECT * FROM " + TABLE_LISTINGS +
-                " WHERE " + COLUMN_SELLER_ID + " = ? AND status = ?";
+        String query = "SELECT * FROM " + TABLE_LISTINGS + " WHERE " + COLUMN_SELLER_ID + " = ? AND status = ?";
         return fetchListings(query, new String[]{String.valueOf(sellerId), status});
     }
 
@@ -318,8 +341,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean isWishlisted(int buyerId, int itemId) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM Wishlist WHERE BuyerID = ? AND ItemID = ?",
-                new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
+        Cursor cursor = db.rawQuery("SELECT * FROM Wishlist WHERE BuyerID = ? AND ItemID = ?", new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
         boolean exists = cursor.getCount() > 0;
         cursor.close();
         return exists;
@@ -327,8 +349,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public boolean removeFromWishlist(int buyerId, int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int result = db.delete("Wishlist", "BuyerID = ? AND ItemID = ?",
-                new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
+        int result = db.delete("Wishlist", "BuyerID = ? AND ItemID = ?", new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
         return result > 0;
     }
 
@@ -355,9 +376,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    sendLocalNotification(context,
-                            "An item in your Favorites has been sold!",
-                            itemTitle + " is no longer available.");
+                    sendLocalNotification(context, "An item in your Favorites has been sold!", itemTitle + " is no longer available.");
                 } while (cursor.moveToNext());
             }
             cursor.close();
@@ -366,25 +385,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private void sendLocalNotification(Context context, String title, String message) {
         String channelId = "item_updates_channel";
-        android.app.NotificationManager notificationManager =
-                (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        android.app.NotificationManager notificationManager = (android.app.NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            android.app.NotificationChannel channel = new android.app.NotificationChannel(
-                    channelId, "Campus Marketplace Updates",
-                    android.app.NotificationManager.IMPORTANCE_DEFAULT);
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(channelId, "Campus Marketplace Updates", android.app.NotificationManager.IMPORTANCE_DEFAULT);
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
         }
 
-        androidx.core.app.NotificationCompat.Builder builder =
-                new androidx.core.app.NotificationCompat.Builder(context, channelId)
-                        .setSmallIcon(android.R.drawable.stat_notify_chat)
-                        .setContentTitle(title)
-                        .setContentText(message)
-                        .setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT)
-                        .setAutoCancel(true);
+        androidx.core.app.NotificationCompat.Builder builder = new androidx.core.app.NotificationCompat.Builder(context, channelId).setSmallIcon(android.R.drawable.stat_notify_chat).setContentTitle(title).setContentText(message).setPriority(androidx.core.app.NotificationCompat.PRIORITY_DEFAULT).setAutoCancel(true);
 
         if (notificationManager != null) {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
@@ -407,9 +417,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (watcherCursor != null) {
                 if (watcherCursor.moveToFirst()) {
                     do {
-                        sendLocalNotification(context,
-                                "Price drop alert! ",
-                                "An item in your Favorites (" + itemTitle + ") changed from RM " + oldPrice + " to RM " + newPrice + ".");
+                        sendLocalNotification(context, "Price drop alert! ", "An item in your Favorites (" + itemTitle + ") changed from RM " + oldPrice + " to RM " + newPrice + ".");
                     } while (watcherCursor.moveToNext());
                 }
                 watcherCursor.close();
@@ -420,49 +428,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<Listing> getWishlistListings(int buyerId) {
         List<Listing> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT l.* FROM " + TABLE_LISTINGS + " l " +
-                "JOIN Wishlist w ON l." + COLUMN_ID + " = w.ItemID " +
-                "WHERE w.BuyerID = ?";
+        String query = "SELECT l.* FROM " + TABLE_LISTINGS + " l " + "JOIN Wishlist w ON l." + COLUMN_ID + " = w.ItemID " + "WHERE w.BuyerID = ?";
 
         Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(buyerId)});
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(new Listing(
-                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FACULTY)),
-                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)),
-                        cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SELLER_ID)),
-                        cursor.getString(cursor.getColumnIndexOrThrow("status"))
-                ));
+                list.add(new Listing(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FACULTY)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)), cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SELLER_ID)), cursor.getString(cursor.getColumnIndexOrThrow("status"))));
             } while (cursor.moveToNext());
         }
         cursor.close();
         return list;
     }
 
-    // 🛠️ FIXED: CLEAN DYNAMIC RESOURCE CONSTANT MAPPING (PREVENTS CRASHES)
     public Cursor getCategoryAnalyticsData() {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COLUMN_CATEGORY + ", SUM(" + COLUMN_WHATSAPP_CLICKS + ") AS TotalClicks " +
-                "FROM " + TABLE_LISTINGS + " " +
-                "GROUP BY " + COLUMN_CATEGORY + " " +
-                "ORDER BY TotalClicks DESC";
+        String query = "SELECT " + COLUMN_CATEGORY + ", SUM(" + COLUMN_WHATSAPP_CLICKS + ") AS TotalClicks " + "FROM " + TABLE_LISTINGS + " " + "GROUP BY " + COLUMN_CATEGORY + " " + "ORDER BY TotalClicks DESC";
         return db.rawQuery(query, null);
     }
 
-    // 🛠️ ADDED: INCREMENT CLICKS RECORDER METHOD WRAPPER
     public void incrementWhatsAppClicks(int listingId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("UPDATE " + TABLE_LISTINGS +
-                " SET " + COLUMN_WHATSAPP_CLICKS + " = " + COLUMN_WHATSAPP_CLICKS + " + 1 " +
-                " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(listingId)});
+        db.execSQL("UPDATE " + TABLE_LISTINGS + " SET " + COLUMN_WHATSAPP_CLICKS + " = " + COLUMN_WHATSAPP_CLICKS + " + 1 " + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(listingId)});
     }
 
     private void insertMockData(SQLiteDatabase db) {
@@ -527,13 +514,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_WHATSAPP_CLICKS, 14);
         db.insert(TABLE_LISTINGS, null, values);
     }
+
     public Cursor getItemDistributionCount() {
         SQLiteDatabase db = this.getReadableDatabase();
-        // Counts how many items exist per category group inside your system
-        return db.rawQuery(
-                "SELECT " + COLUMN_CATEGORY + ", COUNT(*) AS TotalCount " +
-                        "FROM " + TABLE_LISTINGS + " " +
-                        "GROUP BY " + COLUMN_CATEGORY + " " +
-                        "ORDER BY TotalCount DESC", null);
+        return db.rawQuery("SELECT " + COLUMN_CATEGORY + ", COUNT(*) AS TotalCount " + "FROM " + TABLE_LISTINGS + " " + "GROUP BY " + COLUMN_CATEGORY + " " + "ORDER BY TotalCount DESC", null);
+    }
+
+    public boolean updateStudentProfileData(String email, String name, String imagePath) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("Name", name);
+        values.put("ProfileImage", imagePath);
+        int result = db.update("Student", values, "Email=?", new String[]{email});
+        db.close();
+        return result > 0;
     }
 }

@@ -1,10 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F9FC"
-    android:orientation="vertical">
-    <!--  Top Bar  -->
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
+
+    <!--  Top Bar Toolbar Header  -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,6 +41,7 @@
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Scrollable content view area viewport box -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -48,7 +52,67 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            <!--  Notifications Section  -->
+
+            <!-- - SECTION 1: Profile Customization (Avatar Picker & Name input) - -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:text="Profile Customization"
+                android:textColor="#44474F"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:id="@+id/iv_settings_avatar"
+                        android:layout_width="90dp"
+                        android:layout_height="90dp"
+                        android:scaleType="centerCrop"
+                        android:src="@android:drawable/ic_menu_gallery"
+                        android:background="#E2E8F0"
+                        android:clickable="true"
+                        android:focusable="true"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="16dp"
+                        android:text="Tap picture frame to update profile photo"
+                        android:textColor="#0061A4"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/et_settings_username"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:background="@android:drawable/editbox_background"
+                        android:hint="Enter new profile username..."
+                        android:paddingHorizontal="14dp"
+                        android:textSize="15sp"
+                        android:textColor="#1A1C1E"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!--- SECTION 2: Notifications Preferences - -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -69,7 +133,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-                    <!--  Push Notifications  -->
+
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="72dp"
@@ -216,7 +280,8 @@
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-            <!--  Privacy & Security Section  -->
+
+            <!-- - SECTION 3: Privacy & Security - -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -339,7 +404,8 @@
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-            <!--  Support Section  -->
+
+            <!-- - SECTION 4: Support Utilities - -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -354,7 +420,6 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
 
@@ -468,6 +533,19 @@
                     </RelativeLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- - SECTION 5: Submission Control - -->
+            <Button
+                android:id="@+id/btn_save_settings"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="24dp"
+                android:text="Save Profile Updates"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#0061A4"
+                android:textStyle="bold" />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

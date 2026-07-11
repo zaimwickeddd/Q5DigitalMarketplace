@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,6 +19,7 @@ public class ProfileDashboardFragment extends Fragment {
 
     private DatabaseHelper dbHelper;
     private TextView tvName, tvEmail, tvListings, tvFavourites;
+    private ImageView ivProfileImage; // Tracks user profile custom avatars
 
     @Nullable
     @Override
@@ -25,6 +28,8 @@ public class ProfileDashboardFragment extends Fragment {
 
         dbHelper = new DatabaseHelper(getContext());
 
+        // Initialize UI component bindings
+        ivProfileImage = view.findViewById(R.id.iv_profile_image);
         tvName = view.findViewById(R.id.tv_profile_name);
         tvEmail = view.findViewById(R.id.tv_profile_email);
         tvListings = view.findViewById(R.id.tv_count_listings);
@@ -47,7 +52,7 @@ public class ProfileDashboardFragment extends Fragment {
             }
         });
 
-        // 2. Handle Account Settings navigation
+        // 2. Handle Account Settings navigation redirection routing rules
         view.findViewById(R.id.rl_account_settings).setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, new AccountSettingsFragment())
@@ -67,7 +72,18 @@ public class ProfileDashboardFragment extends Fragment {
             });
         }
 
-        // 4. MERGED: Report & Analytics Navigation Click Handler
+        // 4. My Favourites Fragment Navigation Action Mapping
+        View rlMyFavourites = view.findViewById(R.id.rl_my_favourites);
+        if (rlMyFavourites != null) {
+            rlMyFavourites.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new FavoritesFragment()) // Routes into bookmarks list view container page
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
+
+        // 5. Report & Analytics Navigation Click Handler
         View rlAnalytics = view.findViewById(R.id.rl_analytics);
         if (rlAnalytics != null) {
             rlAnalytics.setOnClickListener(v -> {
@@ -97,17 +113,32 @@ public class ProfileDashboardFragment extends Fragment {
             if (cursor != null && cursor.moveToFirst()) {
                 tvName.setText(cursor.getString(1)); // Name (Index 1 matching updated DB helper query index positions)
                 tvEmail.setText(cursor.getString(2)); // Email (Index 2 matching updated DB helper query index positions)
+
+                // Detect and load user profile image paths dynamically
+                String imgPath = cursor.getString(5); // ProfileImage index location
+                if (imgPath != null && !imgPath.trim().isEmpty() && ivProfileImage != null) {
+                    ivProfileImage.setImageURI(Uri.parse(imgPath));
+                } else if (ivProfileImage != null) {
+                    // Fallback to stock placeholder asset vector profile drawable frame
+                    ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
                 cursor.close();
             } else {
                 // Fallback to name from Users table if Student record not found
                 String username = dbHelper.getUserNameByEmail(loggedInEmail);
                 tvName.setText(username);
                 tvEmail.setText(loggedInEmail);
+                if (ivProfileImage != null) {
+                    ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
             }
         } else {
             // Fallback default placeholder info for Guest or missing session
             tvName.setText("Guest User");
             tvEmail.setText("Not signed in");
+            if (ivProfileImage != null) {
+                ivProfileImage.setImageResource(android.R.drawable.ic_menu_gallery);
+            }
         }
 
         // Pull active contextual dynamic transaction counts
