@@ -49,13 +49,16 @@ public class SignupActivity extends AppCompatActivity {
             // 1. Validate complete field inputs
             if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || password.isEmpty()) {
                 showToast("Please fill all fields");
+            } else if (!isValidStudentEmail(email)) {
+                // 2. Restrict to UiTM student email format
+                showToast("Only UiTM student emails are allowed\n(e.g., name@student.uitm.edu.my)");
             } else {
                 // Disable button immediately to prevent double-clicks during processing
                 btnSignUp.setEnabled(false);
 
                 // Push the database transaction to a background thread
                 executorService.execute(() -> {
-                    // 2. Inserts into the database via your helper method
+                    // 3. Inserts into the database via your helper method
                     boolean success = dbHelper.addUser(username, email, phone, password);
 
                     // Post the result and UI modifications back to the Main (UI) Thread
@@ -79,6 +82,13 @@ public class SignupActivity extends AppCompatActivity {
             // Dismisses signup activity context and reverts interface display to LoginActivity
             finish();
         });
+    }
+
+    /**
+     * Validates if the email follows the UiTM student format: @student.uitm.edu.my
+     */
+    private boolean isValidStudentEmail(String email) {
+        return email.toLowerCase().endsWith("@student.uitm.edu.my");
     }
 
     // Helper method to safely manage and clear Toast notifications

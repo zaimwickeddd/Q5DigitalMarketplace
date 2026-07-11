@@ -12,8 +12,8 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    // 🛠️ BUMPED TO VERSION 24: Forces schema rebuild to clear old structures and apply new wishlist mock seed entries
-    private static final int DATABASE_VERSION = 24;
+    // 🛠️ BUMPED TO VERSION 30: Ensures we stay ahead of any local versions to avoid downgrade crashes.
+    private static final int DATABASE_VERSION = 30;
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";

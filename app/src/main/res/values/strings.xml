@@ -44,4 +44,10 @@
     <string name="save_changes">Save Changes</string>
     <string name="product_image_desc">Product Image</string>
     <string name="preview_label">Plugin</string>
+
+    <!-- Splash Screen Strings -->
+    <string name="splash_brand_name">Q5</string>
+    <string name="splash_brand_tagline">DIGITAL MARKETPLACE</string>
+    <string name="splash_footer_text">ELEVATING CAMPUS COMMERCE</string>
+    <string name="app_logo_desc">Application Logo</string>
 </resources>
