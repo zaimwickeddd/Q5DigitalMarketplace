@@ -1,6 +1,8 @@
 package com.example.q5digitalmarketplace;
 
 import android.content.Context;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -73,7 +75,23 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             }
         }
 
-        // 4. Wishlist / Favorite Toggle Logic
+        // 🛠️ 4. SOLD STATUS UI: Apply grayscale and badge if sold
+        if ("Sold".equalsIgnoreCase(currentItem.getStatus())) {
+            // Apply grayscale filter to the image
+            ColorMatrix matrix = new ColorMatrix();
+            matrix.setSaturation(0);
+            ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
+            if (holder.imgProduct != null) holder.imgProduct.setColorFilter(filter);
+            
+            // Show sold badge or change title appearance
+            if (holder.tvTitle != null) holder.tvTitle.setText("[SOLD] " + currentItem.getTitle());
+            holder.itemView.setAlpha(0.7f);
+        } else {
+            if (holder.imgProduct != null) holder.imgProduct.clearColorFilter();
+            holder.itemView.setAlpha(1.0f);
+        }
+
+        // 5. Wishlist / Favorite Toggle Logic
         updateHeartIcon(holder, currentItem.getId());
 
         holder.btnFavorite.setOnClickListener(v -> {
@@ -88,7 +106,7 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             updateHeartIcon(holder, currentItem.getId());
         });
 
-        // 5. Card Container Item Click Navigation Link Router
+        // 6. Card Container Item Click Navigation Link Router
         holder.itemView.setOnClickListener(v -> {
             if (actionListener != null) {
                 actionListener.onItemClick(currentItem);
@@ -125,9 +143,6 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         }
         if (holder.tvCategoryTag != null) {
             holder.tvCategoryTag.setTextColor(textColor);
-        }
-        if (holder.imgProduct != null) {
-            holder.imgProduct.clearColorFilter();
         }
     }
 

@@ -11,9 +11,10 @@
     tools:context=".AnalyticsActivity">
 
     <TextView
+        android:id="@+id/tv_analytics_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Market Analytics"
+        android:text="My Shop Analytics"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="#F9FAFB"/>
@@ -21,12 +22,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Highest buyer interest based on WhatsApp clicks"
+        android:text="Buyer interest insights for your listings"
         android:textSize="13sp"
         android:textColor="#9CA3AF"
         android:layout_marginBottom="24dp"/>
 
-    <!-- 🛠️ FIXED: Added dark theme overlay to force dynamic text elements to default to light/white color profiles -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -47,7 +47,7 @@
                 android:id="@+id/tvNoData"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="No analytics data available yet."
+                android:text="No analytics data available yet. List an item to start tracking!"
                 android:gravity="center"
                 android:textColor="#9CA3AF"
                 android:textSize="14sp"
@@ -62,6 +62,22 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Category Performance"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#F9FAFB"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total clicks by item category"
+                        android:textSize="12sp"
+                        android:textColor="#9CA3AF"
+                        android:layout_marginBottom="12dp"/>
 
                     <!-- Dynamic container for category bar chart rows -->
                     <LinearLayout
@@ -81,7 +97,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System Listing Breakdown"
+                        android:text="My Inventory Breakdown"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#F9FAFB"/>
@@ -89,7 +105,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total inventory distribution across item categories"
+                        android:text="Distribution of your listed items"
                         android:textSize="12sp"
                         android:textColor="#9CA3AF"
                         android:layout_marginBottom="16dp"/>
@@ -108,6 +124,34 @@
                         android:orientation="vertical"
                         android:layout_marginTop="16dp"
                         android:paddingHorizontal="4dp"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#2A2A35"
+                        android:layout_marginVertical="24dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Item Performance"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#F9FAFB"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="WhatsApp clicks per item"
+                        android:textSize="12sp"
+                        android:textColor="#9CA3AF"
+                        android:layout_marginBottom="12dp"/>
+
+                    <LinearLayout
+                        android:id="@+id/layoutItemPerformance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"/>
 
                 </LinearLayout>
             </ScrollView>

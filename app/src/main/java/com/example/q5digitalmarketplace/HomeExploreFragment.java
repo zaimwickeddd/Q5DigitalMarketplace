@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
@@ -32,6 +31,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     // UI Elements
     private TextView tvGreetingTitle;
     private EditText etSearchBar;
+    private View notifBadge;
 
     // SOURCE OF TRUTH: All data is stored here and never overwritten
     private List<Listing> allListingsFromDb = new ArrayList<>();
@@ -49,6 +49,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         recyclerView = view.findViewById(R.id.rv_explore_items);
         tvGreetingTitle = view.findViewById(R.id.tv_greeting_title);
         etSearchBar = view.findViewById(R.id.search_bar);
+        notifBadge = view.findViewById(R.id.notif_badge);
 
         // 1. Layout Configuration: Changed to 1 column for a vertical list layout as requested
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
@@ -78,11 +79,15 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         setupUserGreeting();
         setupSearchLogic();
 
-        // UI Click Listeners with safe Null-Pointer checks to prevent app crashes
+        // 🛠️ UPDATED: The notification bell now navigates to the NotificationsFragment
         View ivNotifBell = view.findViewById(R.id.btn_notif);
         if (ivNotifBell != null) {
-            ivNotifBell.setOnClickListener(v ->
-                    Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show());
+            ivNotifBell.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new NotificationsFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
         }
 
         // FIXED: The top toolbar star icon now loads FavoritesFragment and syncs bottom navigation selection
@@ -94,18 +99,42 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, new FavoritesFragment())
                             .commit();
-
-                    // 2. Highlight the corresponding favorite tab in the Bottom Menu layout
-                    BottomNavigationView bottomNav = getActivity().findViewById(R.id.bottom_navigation);
-
                 }
             });
         }
 
         // Initial Data Load
         refreshDataCache();
+        updateNotificationBadge();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshDataCache();
+        updateNotificationBadge();
+    }
+
+    private void updateNotificationBadge() {
+        if (notifBadge == null) return;
+        
+        SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String email = prefs.getString("user_email", null);
+        
+        if (email != null) {
+            int userId = dbHelper.getStuIDByEmail(email);
+            int unreadCount = dbHelper.getUnreadNotificationsCount(userId);
+            
+            if (unreadCount > 0) {
+                notifBadge.setVisibility(View.VISIBLE);
+            } else {
+                notifBadge.setVisibility(View.GONE);
+            }
+        } else {
+            notifBadge.setVisibility(View.GONE);
+        }
     }
 
     @Override

@@ -128,7 +128,8 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
             findViewById(R.id.layout_empty).setVisibility(View.VISIBLE);
 
             findViewById(R.id.btn_create_listing).setOnClickListener(v -> {
-                startActivity(new Intent(this, CreateListingFragment.class));
+                // Return to CreateListingFragment in MainActivity
+                finish();
             });
         }
     }
@@ -191,9 +192,17 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
 
     @Override
     public void onMarkSold(Listing listing) {
-        dbHelper.updateListingStatus(listing.getId(), "Sold");
-        Toast.makeText(this, "Marked as sold!", Toast.LENGTH_SHORT).show();
-        loadListings();
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Mark as Sold")
+                .setMessage("Are you sure you want to mark this item as sold? It will be moved to your 'Sold' tab.")
+                .setPositiveButton("Mark Sold", (dialog, which) -> {
+                    // 🛠️ Correctly mark as sold and trigger notifications to interested buyers
+                    dbHelper.markItemAsSold(this, listing.getId(), listing.getTitle());
+                    Toast.makeText(this, "Marked as sold!", Toast.LENGTH_SHORT).show();
+                    loadListings();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

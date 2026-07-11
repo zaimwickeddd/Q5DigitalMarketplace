@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 21; // 🛠️ Locked at Version 21 to support profile image features
+    private static final int DATABASE_VERSION = 22; // 🛠️ Bumped to Version 22 for Notifications table
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";
@@ -78,8 +78,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "Date_Added TEXT, " +
                 "BuyerID INTEGER, " +
                 "ItemID INTEGER, " +
-                "FOREIGN KEY(BuyerID) REFERENCES Buyer(BuyerID), " +
+                "FOREIGN KEY(BuyerID) REFERENCES Student(StuID), " +
                 "FOREIGN KEY(ItemID) REFERENCES " + TABLE_LISTINGS + "(" + COLUMN_ID + "));");
+
+        // 6. Create Notifications Table
+        db.execSQL("CREATE TABLE IF NOT EXISTS Notifications (" +
+                "NotifID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "UserID INTEGER, " +
+                "Title TEXT, " +
+                "Message TEXT, " +
+                "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                "IsRead INTEGER DEFAULT 0, " +
+                "FOREIGN KEY(UserID) REFERENCES Student(StuID));");
 
         // Seed default mock catalog dataset records on database instantiation
         insertMockData(db);
@@ -87,13 +97,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // Tables dropped from child dependencies to parents to ensure integrity constraints drop cleanly
-        db.execSQL("DROP TABLE IF EXISTS Wishlist");
-        db.execSQL("DROP TABLE IF EXISTS Seller");
-        db.execSQL("DROP TABLE IF EXISTS Buyer");
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
-        db.execSQL("DROP TABLE IF EXISTS Student");
-        onCreate(db);
+        if (oldVersion < 22) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS Notifications (" +
+                    "NotifID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "UserID INTEGER, " +
+                    "Title TEXT, " +
+                    "Message TEXT, " +
+                    "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                    "IsRead INTEGER DEFAULT 0, " +
+                    "FOREIGN KEY(UserID) REFERENCES Student(StuID));");
+        }
     }
 
     // --- Listing Operations ---
@@ -268,6 +281,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return count;
     }
 
+    public int getWishlistCount(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int count = 0;
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Wishlist WHERE BuyerID = ?", new String[]{String.valueOf(userId)});
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+        return count;
+    }
+
     public List<Listing> getListingsByStatus(String status) {
         List<Listing> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -376,11 +402,59 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    sendLocalNotification(context, "An item in your Favorites has been sold!", itemTitle + " is no longer available.");
+                    int buyerId = cursor.getInt(0);
+                    String title = "Item Sold!";
+                    String message = "An item in your Favorites (" + itemTitle + ") has been sold.";
+                    addNotification(buyerId, title, message);
+                    sendLocalNotification(context, title, message);
                 } while (cursor.moveToNext());
             }
             cursor.close();
         }
+    }
+
+    public void addNotification(int userId, String title, String message) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("UserID", userId);
+        values.put("Title", title);
+        values.put("Message", message);
+        db.insert("Notifications", null, values);
+        db.close();
+    }
+
+    public Cursor getNotifications(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM Notifications WHERE UserID = ? ORDER BY Timestamp DESC", new String[]{String.valueOf(userId)});
+    }
+
+    public int getUnreadNotificationsCount(int userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM Notifications WHERE UserID = ? AND IsRead = 0", new String[]{String.valueOf(userId)});
+        int count = 0;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+            cursor.close();
+        }
+        return count;
+    }
+
+    public void markNotificationAsRead(int notifId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("IsRead", 1);
+        db.update("Notifications", values, "NotifID = ?", new String[]{String.valueOf(notifId)});
+        db.close();
+    }
+
+    public void markAllNotificationsAsRead(int userId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("IsRead", 1);
+        db.update("Notifications", values, "UserID = ?", new String[]{String.valueOf(userId)});
+        db.close();
     }
 
     private void sendLocalNotification(Context context, String title, String message) {
@@ -417,7 +491,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             if (watcherCursor != null) {
                 if (watcherCursor.moveToFirst()) {
                     do {
-                        sendLocalNotification(context, "Price drop alert! ", "An item in your Favorites (" + itemTitle + ") changed from RM " + oldPrice + " to RM " + newPrice + ".");
+                        int buyerId = watcherCursor.getInt(0);
+                        String title = "Price drop alert! ";
+                        String message = "An item in your Favorites (" + itemTitle + ") changed from " + oldPrice + " to " + newPrice + ".";
+                        addNotification(buyerId, title, message);
+                        sendLocalNotification(context, title, message);
                     } while (watcherCursor.moveToNext());
                 }
                 watcherCursor.close();
@@ -445,6 +523,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT " + COLUMN_CATEGORY + ", SUM(" + COLUMN_WHATSAPP_CLICKS + ") AS TotalClicks " + "FROM " + TABLE_LISTINGS + " " + "GROUP BY " + COLUMN_CATEGORY + " " + "ORDER BY TotalClicks DESC";
         return db.rawQuery(query, null);
+    }
+
+    public Cursor getCategoryAnalyticsDataBySeller(int sellerId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_CATEGORY + ", SUM(" + COLUMN_WHATSAPP_CLICKS + ") AS TotalClicks " +
+                "FROM " + TABLE_LISTINGS + " " +
+                "WHERE " + COLUMN_SELLER_ID + " = ? " +
+                "GROUP BY " + COLUMN_CATEGORY + " " +
+                "ORDER BY TotalClicks DESC";
+        return db.rawQuery(query, new String[]{String.valueOf(sellerId)});
+    }
+
+    public Cursor getItemPerformanceDataBySeller(int sellerId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_TITLE + ", " + COLUMN_WHATSAPP_CLICKS + " " +
+                "FROM " + TABLE_LISTINGS + " " +
+                "WHERE " + COLUMN_SELLER_ID + " = ? " +
+                "ORDER BY " + COLUMN_WHATSAPP_CLICKS + " DESC";
+        return db.rawQuery(query, new String[]{String.valueOf(sellerId)});
     }
 
     public void incrementWhatsAppClicks(int listingId) {
@@ -518,6 +615,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor getItemDistributionCount() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT " + COLUMN_CATEGORY + ", COUNT(*) AS TotalCount " + "FROM " + TABLE_LISTINGS + " " + "GROUP BY " + COLUMN_CATEGORY + " " + "ORDER BY TotalCount DESC", null);
+    }
+
+    public Cursor getItemDistributionCountBySeller(int sellerId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT " + COLUMN_CATEGORY + ", COUNT(*) AS TotalCount " +
+                "FROM " + TABLE_LISTINGS + " " +
+                "WHERE " + COLUMN_SELLER_ID + " = ? " +
+                "GROUP BY " + COLUMN_CATEGORY + " " +
+                "ORDER BY TotalCount DESC", new String[]{String.valueOf(sellerId)});
     }
 
     public boolean updateStudentProfileData(String email, String name, String imagePath) {
