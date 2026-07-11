@@ -42,4 +42,6 @@
     <string name="empty_list_icon">Empty list icon</string>
 
     <string name="save_changes">Save Changes</string>
+    <string name="product_image_desc">Product Image</string>
+    <string name="preview_label">Plugin</string>
 </resources>

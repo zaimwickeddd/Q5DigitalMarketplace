@@ -43,9 +43,20 @@ public class ExploreItemsFragment extends Fragment implements ListingAdapter.OnL
         etSearchBar = view.findViewById(R.id.et_search_bar);
         RecyclerView recyclerView = view.findViewById(R.id.rv_explore_items_list);
 
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        // 1. Layout Configuration: Changed to 1 column for a vertical list to match the Home screen design
+        recyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
 
-        // 1. Fetch current user session details to comply with updated adapter contract requirements
+        // 2. Spacing Logic: Vertical spacing between the cards
+        int verticalSpacing = (int) android.util.TypedValue.applyDimension(
+                android.util.TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
+        recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(@NonNull android.graphics.Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+                outRect.bottom = verticalSpacing;
+            }
+        });
+
+        // 3. Fetch current user session details to comply with updated adapter contract requirements
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String loggedInEmail = prefs.getString("user_email", "");
         int currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);

@@ -50,26 +50,22 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         tvGreetingTitle = view.findViewById(R.id.tv_greeting_title);
         etSearchBar = view.findViewById(R.id.search_bar);
 
-        // 1. Layout Configuration
-        int screenWidthDp = getResources().getConfiguration().screenWidthDp;
-        int spanCount = (screenWidthDp >= 720) ? 4 : (screenWidthDp >= 600) ? 3 : 2;
-        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
+        // 1. Layout Configuration: Changed to 1 column for a vertical list layout as requested
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
-        // 2. Fix Spacing: Add 16dp spacing between cards to solve the "cramped" UI
-        int spacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+        // 2. Spacing Logic: Vertical spacing between the cards - Increased for better visibility
+        int verticalSpacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                outRect.left = spacing / 2;
-                outRect.right = spacing / 2;
-                outRect.bottom = spacing;
-                // Add top margin only to the first row
-                if (parent.getChildAdapterPosition(view) < spanCount) outRect.top = spacing;
+                // We only add bottom spacing as the XML handles horizontal margins
+                outRect.bottom = verticalSpacing;
+                if (parent.getChildAdapterPosition(view) == 0) outRect.top = verticalSpacing;
             }
         });
 
         // 3. Wrench Filter Button: Logic to open the navigation drawer
-        View btnFilters = view.findViewById(R.id.btn_open_filters_home);
+        View btnFilters = view.findViewById(R.id.btn_settings);
         if (btnFilters != null) {
             btnFilters.setOnClickListener(v -> {
                 if (getActivity() instanceof MainActivity) {
@@ -83,14 +79,14 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         setupSearchLogic();
 
         // UI Click Listeners with safe Null-Pointer checks to prevent app crashes
-        View ivNotifBell = view.findViewById(R.id.iv_notif_bell);
+        View ivNotifBell = view.findViewById(R.id.btn_notif);
         if (ivNotifBell != null) {
             ivNotifBell.setOnClickListener(v ->
                     Toast.makeText(getContext(), "Notifications coming soon!", Toast.LENGTH_SHORT).show());
         }
 
         // FIXED: The top toolbar star icon now loads FavoritesFragment and syncs bottom navigation selection
-        View ivFavStar = view.findViewById(R.id.iv_fav_star);
+        View ivFavStar = view.findViewById(R.id.btn_favs);
         if (ivFavStar != null) {
             ivFavStar.setOnClickListener(v -> {
                 if (getActivity() != null) {

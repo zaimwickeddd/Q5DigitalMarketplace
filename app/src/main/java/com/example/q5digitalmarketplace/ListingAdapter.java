@@ -16,20 +16,25 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
     private List<Listing> listingsList;
     private DatabaseHelper dbHelper;
     private int currentUserId;
-    private OnListingActionListener actionListener; // Tracks item click events
+    private OnListingActionListener actionListener;
+    private int layoutResId;
 
-    // Unified Constructor setup containing your full interface routing maps
     public ListingAdapter(List<Listing> listingsList, Context context, int currentUserId, OnListingActionListener actionListener) {
+        this(listingsList, context, currentUserId, actionListener, R.layout.item_product);
+    }
+
+    public ListingAdapter(List<Listing> listingsList, Context context, int currentUserId, OnListingActionListener actionListener, int layoutResId) {
         this.listingsList = listingsList;
         this.dbHelper = new DatabaseHelper(context);
         this.currentUserId = currentUserId;
         this.actionListener = actionListener;
+        this.layoutResId = layoutResId;
     }
 
     @NonNull
     @Override
     public ListingViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_marketplace_card, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(layoutResId, parent, false);
         return new ListingViewHolder(view);
     }
 
@@ -49,7 +54,10 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
             holder.tvCategoryTag.setText(currentItem.getCategory());
         }
 
-        // 2. Dynamic Image Rendering Layer (Loads lenovo_laptop, mandarin_books, etc.)
+        // 2. Dynamic Category Theme Tint Logic
+        applyCategoryTheme(holder, currentItem.getCategory(), context);
+
+        // 3. Dynamic Image Rendering Layer
         if (holder.imgProduct != null && currentItem.getImagePath() != null) {
             String imageName = currentItem.getImagePath();
             int imageResId = context.getResources().getIdentifier(
@@ -57,43 +65,77 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
 
             if (imageResId != 0) {
                 holder.imgProduct.setImageResource(imageResId);
+                holder.imgProduct.setScaleType(ImageView.ScaleType.CENTER_CROP);
             } else {
-                // Fallback placeholder icon asset if specific resource name string isn't found
-                holder.imgProduct.setImageResource(android.R.drawable.ic_menu_gallery);
+                // Determine default icon based on category
+                holder.imgProduct.setImageResource(getDefaultCategoryIcon(currentItem.getCategory()));
+                holder.imgProduct.setScaleType(ImageView.ScaleType.FIT_CENTER);
             }
         }
 
-        // 3. Card Container Item Click Navigation Link Router
+        // 4. Wishlist / Favorite Toggle Logic
+        updateHeartIcon(holder, currentItem.getId());
+
+        holder.btnFavorite.setOnClickListener(v -> {
+            boolean isCurrentlyWishlisted = dbHelper.isWishlisted(currentUserId, currentItem.getId());
+            if (isCurrentlyWishlisted) {
+                dbHelper.removeFromWishlist(currentUserId, currentItem.getId());
+                Toast.makeText(context, "Removed from Favorites", Toast.LENGTH_SHORT).show();
+            } else {
+                dbHelper.insertWishlist(currentUserId, currentItem.getId());
+                Toast.makeText(context, "Added to Favorites!", Toast.LENGTH_SHORT).show();
+            }
+            updateHeartIcon(holder, currentItem.getId());
+        });
+
+        // 5. Card Container Item Click Navigation Link Router
         holder.itemView.setOnClickListener(v -> {
             if (actionListener != null) {
                 actionListener.onItemClick(currentItem);
             }
         });
+    }
 
-        // 4. Interactive Wishlist Star Persistence Logic
-        if (holder.ivFavStar != null) {
-            boolean isFavorited = dbHelper.isWishlisted(currentUserId, currentItem.getId());
-
-            // Synchronize starting visual state with SQLite database records
-            if (isFavorited) {
-                holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
-            } else {
-                holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
-            }
-
-            // Favorites quick toggle tap click click handler
-            holder.ivFavStar.setOnClickListener(v -> {
-                if (dbHelper.isWishlisted(currentUserId, currentItem.getId())) {
-                    dbHelper.removeFromWishlist(currentUserId, currentItem.getId());
-                    holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_off);
-                    Toast.makeText(context, "Removed from Favorites", Toast.LENGTH_SHORT).show();
-                } else {
-                    dbHelper.insertWishlist(currentUserId, currentItem.getId());
-                    holder.ivFavStar.setImageResource(android.R.drawable.btn_star_big_on);
-                    Toast.makeText(context, "Added to Favorites!", Toast.LENGTH_SHORT).show();
-                }
-            });
+    private void updateHeartIcon(ListingViewHolder holder, int itemId) {
+        boolean isWishlisted = dbHelper.isWishlisted(currentUserId, itemId);
+        if (holder.btnFavorite instanceof android.widget.ImageButton) {
+            android.widget.ImageButton btn = (android.widget.ImageButton) holder.btnFavorite;
+            btn.setImageResource(isWishlisted ? R.drawable.ic_heart_filled : R.drawable.ic_heart_outline);
+            btn.setColorFilter(holder.itemView.getContext().getColor(isWishlisted ? R.color.colorSecondary : R.color.textColorSecondary));
         }
+    }
+
+    private void applyCategoryTheme(ListingViewHolder holder, String category, Context context) {
+        int bgColor = context.getColor(R.color.colorSurface);
+        int textColor = context.getColor(R.color.colorPrimary);
+
+        if ("Electronics".equalsIgnoreCase(category)) {
+            bgColor = context.getColor(R.color.tint_blue_bg);
+            textColor = context.getColor(R.color.tint_blue_text);
+        } else if ("Books".equalsIgnoreCase(category)) {
+            bgColor = context.getColor(R.color.tint_purple_bg);
+            textColor = context.getColor(R.color.tint_purple_text);
+        } else if ("Clothes".equalsIgnoreCase(category) || "Bags".equalsIgnoreCase(category)) {
+            bgColor = context.getColor(R.color.tint_amber_bg);
+            textColor = context.getColor(R.color.tint_amber_text);
+        }
+
+        if (holder.imgContainer != null) {
+            holder.imgContainer.setCardBackgroundColor(bgColor);
+        }
+        if (holder.tvCategoryTag != null) {
+            holder.tvCategoryTag.setTextColor(textColor);
+        }
+        if (holder.imgProduct != null) {
+            holder.imgProduct.clearColorFilter();
+        }
+    }
+
+    private int getDefaultCategoryIcon(String category) {
+        if ("Electronics".equalsIgnoreCase(category)) return R.drawable.ic_laptop_outline;
+        if ("Books".equalsIgnoreCase(category)) return R.drawable.ic_book_outline;
+        if ("Clothes".equalsIgnoreCase(category)) return R.drawable.ic_shirt_outline;
+        return R.drawable.ic_person_outline;
     }
 
     @Override
@@ -101,18 +143,21 @@ public class ListingAdapter extends RecyclerView.Adapter<ListingAdapter.ListingV
         return listingsList.size();
     }
 
-    // ViewHolder class mapped precisely to your active item_marketplace_card XML tags
+    // ViewHolder class mapped precisely to your active item_product XML tags
     public static class ListingViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivFavStar, imgProduct;
+        ImageView imgProduct;
         TextView tvTitle, tvPrice, tvCategoryTag;
+        com.google.android.material.card.MaterialCardView imgContainer;
+        View btnFavorite;
 
         public ListingViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivFavStar = itemView.findViewById(R.id.iv_fav_star);
             imgProduct = itemView.findViewById(R.id.img_product);
             tvTitle = itemView.findViewById(R.id.tv_title);
             tvPrice = itemView.findViewById(R.id.tv_price);
             tvCategoryTag = itemView.findViewById(R.id.tv_category_tag);
+            imgContainer = itemView.findViewById(R.id.img_container);
+            btnFavorite = itemView.findViewById(R.id.btn_favorite);
         }
     }
 

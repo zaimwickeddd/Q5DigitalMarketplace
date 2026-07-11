@@ -2,14 +2,15 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://tools.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="#FFFFFF"
-    app:strokeWidth="0dp"
-    app:cardElevation="2dp">
+    app:cardBackgroundColor="#1E1E2A"
+    app:strokeWidth="1dp"
+    app:strokeColor="#2A2A35"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -32,8 +33,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:background="#B3000000"
-            android:textColor="#FFFFFF"
+            android:background="#B3121212"
+            android:textColor="#06B6D4"
             android:textSize="11sp"
             android:textStyle="bold"
             android:paddingHorizontal="8dp"
@@ -53,6 +54,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:tint="#EC4899"
             android:contentDescription="Favorite Button"/>
 
         <com.google.android.material.card.MaterialCardView
@@ -62,17 +64,16 @@
             android:layout_margin="10dp"
             android:clickable="true"
             android:focusable="true"
-            app:cardBackgroundColor="#22C55E"
-            app:cardCornerRadius="19dp"
+            app:cardBackgroundColor="#25D366"
+            app:cardCornerRadius="16dp"
             app:strokeWidth="0dp"
-            app:cardElevation="3dp"
+            app:cardElevation="4dp"
             app:layout_constraintBottom_toBottomOf="@id/img_product"
             app:layout_constraintEnd_toEndOf="@id/img_product">
 
             <ImageView
-                android:id="@+id/iv_fav_star"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:src="@android:drawable/ic_input_add"
                 app:tint="#FFFFFF"
@@ -94,7 +95,7 @@
                 android:id="@+id/tv_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#1E293B"
+                android:textColor="#FFFFFF"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:maxLines="1"
@@ -106,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="#2563EB"
+                android:textColor="#06B6D4"
                 android:textStyle="bold"
                 android:textSize="14sp"
                 tools:text="RM 20" />
