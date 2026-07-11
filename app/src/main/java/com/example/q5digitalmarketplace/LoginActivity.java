@@ -91,26 +91,6 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, SignupActivity.class);
             startActivity(intent);
         });
-
-        // 🛠️ TEMPORARY DEVELOPER BYPASS BUTTON FUNCTION HANDLER:
-        // Automatically creates a profile record row if missing and passes the auth gates instantly
-        findViewById(R.id.btn_dev_bypass).setOnClickListener(v -> {
-            // 1. Verify if the test profile already exists inside the Student database table
-            int stuId = dbHelper.getStuIDByEmail("najib@gmail.com");
-            if (stuId == -1) {
-                // If it is completely missing, insert a default placeholder profile record row row
-                dbHelper.addUser("Najib", "najib@gmail.com", "0123456789", "password");
-            }
-
-            // 2. Directly write the session authorization token onto the local SharedPreferences device file
-            prefs.edit().putString("user_email", "najib@gmail.com").apply();
-
-            // 3. Immediately transition forward into the main structural container dashboard space
-            showToast("Logged in via Dev Bypass");
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        });
     }
 
     // Helper method to safely manage and clear Toast notifications

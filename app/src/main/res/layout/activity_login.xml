@@ -154,17 +154,6 @@
                         android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_dev_bypass"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="⚡ [DEV] Bypass Auth Gate"
-                    android:textColor="@color/colorSecondary"
-                    android:textSize="12sp"
-                    app:rippleColor="#33EC4899" />
             </LinearLayout>
 
         </LinearLayout>

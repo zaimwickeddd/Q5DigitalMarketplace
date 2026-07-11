@@ -62,7 +62,11 @@ public class EditProfileFragment extends Fragment {
 
         loadCurrentData();
 
-        view.findViewById(R.id.btn_back).setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        // 🛠️ FIXED: Safely binds view reference without explicit casting to avoid ClassCastException crashes
+        View btnBack = view.findViewById(R.id.btn_back);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
 
         view.findViewById(R.id.btn_change_photo).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -83,7 +87,7 @@ public class EditProfileFragment extends Fragment {
 
                 etUsername.setText(name);
 
-                // 🛠️ FIXED: UPGRADED DYNAMIC SMART IMAGE PARSER FOR EDIT VIEWPORT
+                // DYNAMIC SMART IMAGE PARSER FOR EDIT VIEWPORT
                 if (imagePath != null && !imagePath.trim().isEmpty()) {
                     Context context = getContext();
                     int resId = 0;
@@ -92,16 +96,13 @@ public class EditProfileFragment extends Fragment {
                     }
 
                     if (resId != 0) {
-                        // Successfully matched a local mock asset name string from drawables
                         imgProfile.setImageResource(resId);
                     } else {
-                        // Fallback: Parse string path structure as a local device content URI
                         imgProfile.setImageURI(Uri.parse(imagePath.trim()));
                     }
                     imgProfile.setVisibility(View.VISIBLE);
                     tvInitial.setVisibility(View.GONE);
                 } else if (name != null && !name.isEmpty()) {
-                    // Standard text initial fallback mode if image path string data is completely empty
                     tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
                     imgProfile.setVisibility(View.GONE);
                     tvInitial.setVisibility(View.VISIBLE);
@@ -125,7 +126,6 @@ public class EditProfileFragment extends Fragment {
             return;
         }
 
-        // Update Name and Image
         String currentPhone = "";
         Cursor cursor = dbHelper.getStudentProfileByEmail(userEmail);
         if (cursor != null && cursor.moveToFirst()) {

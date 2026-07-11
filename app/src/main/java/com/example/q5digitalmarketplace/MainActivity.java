@@ -1,8 +1,14 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -10,6 +16,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -36,6 +44,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view_sidebar);
+        View bottomNavCard = findViewById(R.id.bottom_navigation_card);
+
+        // 🛠️ FIXED: Added WindowInsetsCompat.CONSUMED to prevent inner padding issues
+        if (bottomNavCard != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomNavCard, (v, insets) -> {
+                int bottomInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+
+                ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+
+                int originalMarginPx = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, 16, getResources().getDisplayMetrics());
+
+                params.bottomMargin = originalMarginPx + bottomInset;
+                v.setLayoutParams(params);
+
+                // 🛠️ CRITICAL FIX: Consume the insets here so they do not pass down to child views
+                return WindowInsetsCompat.CONSUMED;
+            });
+        }
 
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);

@@ -575,7 +575,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 1. Zaim
         userValues.put("StuID", 1);
         userValues.put("Name", "Zaim");
-        userValues.put("Email", "zaim@gmail.com");
+        userValues.put("Email", "zaim@student.uitm.edu.my");
         userValues.put("PhoneNum", "0166221844");
         userValues.put("Password", "1234567");
         userValues.put("UserType", "S");
@@ -586,7 +586,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 2. Nadzim
         userValues.put("StuID", 2);
         userValues.put("Name", "Nadzim");
-        userValues.put("Email", "nadzim@gmail.com");
+        userValues.put("Email", "nadzim@student.uitm.edu.my");
         userValues.put("PhoneNum", "60128794719");
         userValues.put("Password", "1234567");
         userValues.put("UserType", "S");
@@ -597,7 +597,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 3. Karl
         userValues.put("StuID", 3);
         userValues.put("Name", "Karl");
-        userValues.put("Email", "karl@gmail.com");
+        userValues.put("Email", "karl@student.uitm.edu.my");
         userValues.put("PhoneNum", "60137010497");
         userValues.put("Password", "1234567");
         userValues.put("UserType", "S");
@@ -608,7 +608,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 4. Najib
         userValues.put("StuID", 4);
         userValues.put("Name", "Najib");
-        userValues.put("Email", "najib@gmail.com");
+        userValues.put("Email", "najib@student.uitm.edu.my");
         userValues.put("PhoneNum", "0138519619");
         userValues.put("Password", "1234567");
         userValues.put("UserType", "S");

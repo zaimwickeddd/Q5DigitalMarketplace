@@ -45,7 +45,7 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
         etSearchBar = findViewById(R.id.et_search_bar);
         btnFilter = findViewById(R.id.btn_filter_list);
 
-        // 🛠️ FIXED: Bind click listener to the toolbar back navigation arrow element to prevent crashes
+        // Bind click listener to the toolbar back navigation arrow element to prevent crashes
         View btnBackListings = findViewById(R.id.btn_back_listings);
         if (btnBackListings != null) {
             btnBackListings.setOnClickListener(v -> finish());
@@ -175,7 +175,8 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
 
     @Override
     public void onDelete(Listing listing) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        // 🛠️ FIXED: Added the explicit dark theme style parameter wrapper here to resolve the white text rendering bug
+        new androidx.appcompat.app.AlertDialog.Builder(this, com.google.android.material.R.style.Theme_Material3_Dark_Dialog_Alert)
                 .setTitle("Delete Listing")
                 .setMessage("Are you sure you want to delete this?")
                 .setPositiveButton("Delete", (dialog, which) -> {
