@@ -61,11 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + COLUMN_SELLER_ID + ") REFERENCES Student(StuID));");
 
         // 3. Create Buyer Profile Sub-table bounds
-        db.execSQL("CREATE TABLE IF NOT EXISTS Buyer (" +
-                "BuyerID INTEGER PRIMARY KEY, " +
-                "BuyerBio TEXT, " +
-                "Date_Joined TEXT, " +
-                "FOREIGN KEY(BuyerID) REFERENCES Student(StuID));");
+
 
         // 4. Create Seller Profile Sub-table bounds
         db.execSQL("CREATE TABLE IF NOT EXISTS Seller (" +
@@ -101,7 +97,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Wishlist");
         db.execSQL("DROP TABLE IF EXISTS Notifications");
         db.execSQL("DROP TABLE IF EXISTS Seller");
-        db.execSQL("DROP TABLE IF EXISTS Buyer");
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
         db.execSQL("DROP TABLE IF EXISTS Student");
         onCreate(db);
