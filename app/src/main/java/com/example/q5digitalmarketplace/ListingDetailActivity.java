@@ -34,6 +34,9 @@ public class ListingDetailActivity extends AppCompatActivity {
         TextView tvDescription = findViewById(R.id.detail_description);
         TextView tvSellerName = findViewById(R.id.tv_seller_name);
 
+        // 🛠️ BOUND: Reference to the seller's avatar layout image placeholder frame
+        ImageView ivSellerAvatar = findViewById(R.id.iv_seller_avatar);
+
         TextView specCategory = findViewById(R.id.spec_category);
         TextView specCondition = findViewById(R.id.spec_condition);
         TextView specFaculty = findViewById(R.id.spec_faculty);
@@ -109,11 +112,10 @@ public class ListingDetailActivity extends AppCompatActivity {
             if (imagePath != null && !imagePath.trim().isEmpty()) {
                 String cleanImg = imagePath.trim();
                 try {
-                    // 🛠️ 1. CHECK FOR SEEDED DRAWABLE ASSET STRINGS FIRST (e.g., "lenovo_laptop")
+                    // 1. CHECK FOR SEEDED DRAWABLE ASSET STRINGS FIRST (e.g., "lenovo_laptop")
                     int imageResId = getResources().getIdentifier(cleanImg, "drawable", getPackageName());
 
                     if (imageResId != 0) {
-                        // Resource found in res/drawable folder, load it directly
                         imgMain.setImageResource(imageResId);
                     }
                     // 2. FALLBACK TO URI PATH IDENTIFIERS (Gallery uploads)
@@ -149,12 +151,45 @@ public class ListingDetailActivity extends AppCompatActivity {
                 if (cursor.moveToFirst()) {
                     int nameIndex = cursor.getColumnIndex("Name");
                     int phoneIndex = cursor.getColumnIndex("PhoneNum");
+                    int sellerIdIndex = cursor.getColumnIndex("seller_id"); // 🛠️ EXTRACTED: Reference key to track the item's author
 
                     if (nameIndex != -1) sellerName = cursor.getString(nameIndex);
                     if (phoneIndex != -1) sellerPhone = cursor.getString(phoneIndex);
 
                     if (tvSellerName != null) tvSellerName.setText(sellerName);
                     Log.d(TAG, "Seller found: " + sellerName + " | Phone: " + sellerPhone);
+
+                    // 🛠️ FIXED: DYNAMIC SMART PARSER FOR SELLER AVATAR DISPLAY
+                    if (sellerIdIndex != -1 && ivSellerAvatar != null) {
+                        int sellerId = cursor.getInt(sellerIdIndex);
+
+                        // Query the student profile directly from SQLite using the seller ID context
+                        Cursor profileCursor = dbHelper.getReadableDatabase().rawQuery(
+                                "SELECT ProfileImage FROM Student WHERE StuID = ?",
+                                new String[]{String.valueOf(sellerId)});
+
+                        if (profileCursor != null) {
+                            if (profileCursor.moveToFirst()) {
+                                String imgPath = profileCursor.getString(0);
+                                if (imgPath != null && !imgPath.trim().isEmpty()) {
+                                    String cleanProfileImg = imgPath.trim();
+
+                                    // Verify if the value matches a hardcoded local drawable resource string name
+                                    int resId = getResources().getIdentifier(cleanProfileImg, "drawable", getPackageName());
+                                    if (resId != 0) {
+                                        ivSellerAvatar.setImageResource(resId);
+                                    } else {
+                                        // Fallback: Parse string path structure as a local device device content URI
+                                        ivSellerAvatar.setImageURI(Uri.parse(cleanProfileImg));
+                                    }
+                                } else {
+                                    // Default fallback image frame if the data path layout token is blank
+                                    ivSellerAvatar.setImageResource(android.R.drawable.ic_menu_gallery);
+                                }
+                            }
+                            profileCursor.close();
+                        }
+                    }
                 } else {
                     Log.e(TAG, "Cursor empty for Item ID: " + itemId);
                 }
@@ -171,7 +206,6 @@ public class ListingDetailActivity extends AppCompatActivity {
 
         // WhatsApp Intent Action Integration
         findViewById(R.id.btn_whatsapp).setOnClickListener(v -> {
-            // 🛠️ INTEGRATION: Log the WhatsApp tap click counter metrics directly to SQLite
             if (finalItemId != -1) {
                 dbHelper.incrementWhatsAppClicks(finalItemId);
             }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -95,7 +96,7 @@ public class ProfileDashboardFragment extends Fragment {
             });
         }
 
-        // 4. MERGED: Report & Analytics Navigation Click Handler
+        // 4. Report & Analytics Navigation Click Handler
         View rlAnalytics = view.findViewById(R.id.rl_analytics);
         if (rlAnalytics != null) {
             rlAnalytics.setOnClickListener(v -> {
@@ -138,11 +139,25 @@ public class ProfileDashboardFragment extends Fragment {
                 tvName.setText(name);
                 tvEmail.setText(email);
 
-                if (imagePath != null && !imagePath.isEmpty()) {
-                    imgAvatar.setImageURI(android.net.Uri.parse(imagePath));
+                // 🛠️ DYNAMIC SMART EXTRACTION: Handle both plain resource string names and content path URIs smoothly
+                if (imagePath != null && !imagePath.trim().isEmpty()) {
+                    Context context = getContext();
+                    int resId = 0;
+                    if (context != null) {
+                        resId = context.getResources().getIdentifier(imagePath, "drawable", context.getPackageName());
+                    }
+
+                    if (resId != 0) {
+                        // The string matches a static asset matching your profile images list
+                        imgAvatar.setImageResource(resId);
+                    } else {
+                        // The string points to an external device file resource picked via standard crop intents
+                        imgAvatar.setImageURI(Uri.parse(imagePath));
+                    }
                     imgAvatar.setVisibility(View.VISIBLE);
-                    tvInitial.setVisibility(View.GONE);
+                    if (tvInitial != null) tvInitial.setVisibility(View.GONE);
                 } else if (name != null && !name.isEmpty() && tvInitial != null) {
+                    // Fallback to text initials format if image path string is completely null
                     tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
                     imgAvatar.setVisibility(View.GONE);
                     tvInitial.setVisibility(View.VISIBLE);
@@ -153,8 +168,10 @@ public class ProfileDashboardFragment extends Fragment {
                 String username = dbHelper.getUserNameByEmail(loggedInEmail);
                 tvName.setText(username);
                 tvEmail.setText(loggedInEmail);
+                if (imgAvatar != null) imgAvatar.setVisibility(View.GONE);
                 if (username != null && !username.isEmpty() && tvInitial != null) {
                     tvInitial.setText(String.valueOf(username.charAt(0)).toUpperCase());
+                    tvInitial.setVisibility(View.VISIBLE);
                 }
             }
 
@@ -163,7 +180,7 @@ public class ProfileDashboardFragment extends Fragment {
             tvListings.setText(String.valueOf(myListingsCount));
             tvFavourites.setText(String.valueOf(dbHelper.getWishlistCount(userId)));
 
-            // 🛠️ Restrict Analytics access: Only show if user has at least 1 listing
+            // Restrict Analytics access: Only show if user has at least 1 listing
             if (llAnalyticsSection != null) {
                 if (myListingsCount > 0) {
                     llAnalyticsSection.setVisibility(View.VISIBLE);
@@ -177,6 +194,11 @@ public class ProfileDashboardFragment extends Fragment {
             tvEmail.setText("Not signed in");
             tvListings.setText("0");
             tvFavourites.setText("0");
+            if (imgAvatar != null) imgAvatar.setVisibility(View.GONE);
+            if (tvInitial != null) {
+                tvInitial.setText("G");
+                tvInitial.setVisibility(View.VISIBLE);
+            }
             if (llAnalyticsSection != null) {
                 llAnalyticsSection.setVisibility(View.GONE);
             }

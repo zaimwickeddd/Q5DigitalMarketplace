@@ -19,7 +19,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout drawerLayout;
 
-    // 1. Runtime system permission request system interface tracking registration node
     private final ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             navigationView.setNavigationItemSelectedListener(this);
         }
 
-        // Initialize runtime push message permission requests for modern operating system compatibility layers
         checkNotificationPermission();
 
         if (savedInstanceState == null) {
@@ -51,7 +49,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .commit();
         }
 
-        // FIXED: Complete mapping containing our new Favorites Fragment routing targets
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();
@@ -74,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    // REQUIRED: This allows your Fragment to open the drawer from the filter icon
     public DrawerLayout getDrawerLayout() {
         return this.drawerLayout;
     }
@@ -84,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_container);
 
-        // Filter Logic
         if (id == R.id.filter_all || id == R.id.filter_electronics || id == R.id.filter_books ||
                 id == R.id.filter_clothes || id == R.id.filter_bags || id == R.id.filter_services) {
 
@@ -105,13 +100,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // Verifies security criteria and requests explicit permission on Android 13+ devices
     private void checkNotificationPermission() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             if (androidx.core.content.ContextCompat.checkSelfPermission(this,
                     android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-
-                // Trigger the system request dialog box prompt
                 requestPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS);
             }
         }

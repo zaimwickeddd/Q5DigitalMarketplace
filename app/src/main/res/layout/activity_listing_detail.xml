@@ -199,11 +199,15 @@
                             app:cardElevation="0dp"
                             app:strokeColor="#06B6D4"
                             app:strokeWidth="1dp">
+
+                            <!-- 🛠️ FIXED: Added the id layout property constraint tag to link up with Java controllers -->
                             <ImageView
+                                android:id="@+id/iv_seller_avatar"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:src="@android:drawable/sym_def_app_icon"
-                                android:scaleType="centerCrop"/>
+                                android:scaleType="centerCrop"
+                                android:contentDescription="Seller Avatar" />
                         </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout

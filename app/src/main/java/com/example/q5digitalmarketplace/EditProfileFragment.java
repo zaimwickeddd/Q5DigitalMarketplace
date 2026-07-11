@@ -55,7 +55,7 @@ public class EditProfileFragment extends Fragment {
         etUsername = view.findViewById(R.id.et_edit_username);
         etPassword = view.findViewById(R.id.et_edit_password);
         tvInitial = view.findViewById(R.id.tv_edit_initial);
-        imgProfile = view.findViewById(R.id.img_edit_profile); // Need to add this to XML
+        imgProfile = view.findViewById(R.id.img_edit_profile);
 
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         userEmail = prefs.getString("user_email", null);
@@ -80,13 +80,28 @@ public class EditProfileFragment extends Fragment {
             if (cursor != null && cursor.moveToFirst()) {
                 String name = cursor.getString(1); // Name
                 String imagePath = cursor.getString(5); // ProfileImage is index 5
-                
+
                 etUsername.setText(name);
-                if (imagePath != null && !imagePath.isEmpty()) {
-                    imgProfile.setImageURI(Uri.parse(imagePath));
+
+                // 🛠️ FIXED: UPGRADED DYNAMIC SMART IMAGE PARSER FOR EDIT VIEWPORT
+                if (imagePath != null && !imagePath.trim().isEmpty()) {
+                    Context context = getContext();
+                    int resId = 0;
+                    if (context != null) {
+                        resId = context.getResources().getIdentifier(imagePath.trim(), "drawable", context.getPackageName());
+                    }
+
+                    if (resId != 0) {
+                        // Successfully matched a local mock asset name string from drawables
+                        imgProfile.setImageResource(resId);
+                    } else {
+                        // Fallback: Parse string path structure as a local device content URI
+                        imgProfile.setImageURI(Uri.parse(imagePath.trim()));
+                    }
                     imgProfile.setVisibility(View.VISIBLE);
                     tvInitial.setVisibility(View.GONE);
                 } else if (name != null && !name.isEmpty()) {
+                    // Standard text initial fallback mode if image path string data is completely empty
                     tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
                     imgProfile.setVisibility(View.GONE);
                     tvInitial.setVisibility(View.VISIBLE);
@@ -122,7 +137,7 @@ public class EditProfileFragment extends Fragment {
         if (selectedImageUri != null) {
             dbHelper.updateStudentProfileImage(userEmail, selectedImageUri);
         }
-        
+
         boolean passwordUpdated = true;
         if (!newPassword.isEmpty()) {
             passwordUpdated = dbHelper.updateStudentPassword(userEmail, newPassword);

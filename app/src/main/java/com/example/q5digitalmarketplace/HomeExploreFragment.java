@@ -3,7 +3,9 @@ package com.example.q5digitalmarketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +22,6 @@ import androidx.core.view.GravityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +34,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     private TextView tvGreetingTitle;
     private EditText etSearchBar;
     private View notifBadge;
+    private ImageView ivHomeAvatar; // 🛠️ ADDED: Reference for the home screen header avatar
 
     // SOURCE OF TRUTH: All data is stored here and never overwritten
     private List<Listing> allListingsFromDb = new ArrayList<>();
@@ -50,16 +53,16 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         tvGreetingTitle = view.findViewById(R.id.tv_greeting_title);
         etSearchBar = view.findViewById(R.id.search_bar);
         notifBadge = view.findViewById(R.id.notif_badge);
+        ivHomeAvatar = view.findViewById(R.id.iv_home_avatar); // 🛠️ INITIALIZED: (Ensure this matches your XML avatar ID!)
 
-        // 1. Layout Configuration: Changed to 1 column for a vertical list layout as requested
+        // 1. Layout Configuration: Changed to 1 column for a vertical list layout
         recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 1));
 
-        // 2. Spacing Logic: Vertical spacing between the cards - Increased for better visibility
+        // 2. Spacing Logic: Vertical spacing between the cards
         int verticalSpacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20, getResources().getDisplayMetrics());
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
-                // We only add bottom spacing as the XML handles horizontal margins
                 outRect.bottom = verticalSpacing;
                 if (parent.getChildAdapterPosition(view) == 0) outRect.top = verticalSpacing;
             }
@@ -79,7 +82,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         setupUserGreeting();
         setupSearchLogic();
 
-        // 🛠️ UPDATED: The notification bell now navigates to the NotificationsFragment
+        // The notification bell now navigates to the NotificationsFragment
         View ivNotifBell = view.findViewById(R.id.btn_notif);
         if (ivNotifBell != null) {
             ivNotifBell.setOnClickListener(v -> {
@@ -90,14 +93,14 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
             });
         }
 
-        // FIXED: The top toolbar star icon now loads FavoritesFragment and syncs bottom navigation selection
+        // The top toolbar star icon now loads FavoritesFragment
         View ivFavStar = view.findViewById(R.id.btn_favs);
         if (ivFavStar != null) {
             ivFavStar.setOnClickListener(v -> {
                 if (getActivity() != null) {
-                    // 1. Swap current container to the Favorites page fragment
                     getActivity().getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, new FavoritesFragment())
+                            .addToBackStack(null)
                             .commit();
                 }
             });
@@ -115,18 +118,19 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         super.onResume();
         refreshDataCache();
         updateNotificationBadge();
+        setupUserGreeting(); // 🛠️ Refresh avatar image state when returning to dashboard
     }
 
     private void updateNotificationBadge() {
         if (notifBadge == null) return;
-        
+
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String email = prefs.getString("user_email", null);
-        
+
         if (email != null) {
             int userId = dbHelper.getStuIDByEmail(email);
             int unreadCount = dbHelper.getUnreadNotificationsCount(userId);
-            
+
             if (unreadCount > 0) {
                 notifBadge.setVisibility(View.VISIBLE);
             } else {
@@ -140,7 +144,6 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // Handle filter passed from MainActivity during navigation
         if (getArguments() != null && getArguments().containsKey("FILTER_CATEGORY_ID")) {
             int filterId = getArguments().getInt("FILTER_CATEGORY_ID");
             filterMarketplaceCategory(filterId);
@@ -150,7 +153,7 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     private void refreshDataCache() {
         this.allListingsFromDb = dbHelper.getAllListings();
         if (this.allListingsFromDb == null) this.allListingsFromDb = new ArrayList<>();
-        applyFilters(); // Initial render
+        applyFilters();
     }
 
     private void setupSearchLogic() {
@@ -159,25 +162,20 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                     currentSearchQuery = s.toString();
-                    applyFilters(); // Re-filter on every keystroke
+                    applyFilters();
                 }
                 @Override public void afterTextChanged(Editable s) {}
             });
         }
     }
 
-    // Public method called by MainActivity/Sidebar
     public void filterMarketplaceCategory(int filterId) {
         this.currentFilterId = filterId;
-
-        // Clear search box when category changes
         if (etSearchBar != null) etSearchBar.setText("");
         currentSearchQuery = "";
-
         applyFilters();
     }
 
-    // THE ENGINE: Combines Search + Category logic in memory
     private void applyFilters() {
         List<Listing> filteredList = new ArrayList<>();
         String categoryName = getCategoryNameFromId(currentFilterId);
@@ -191,17 +189,14 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
             }
         }
 
-        // 1. Get the current user email session from SharedPreferences
         String loggedInEmail = "";
         if (getActivity() != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
             loggedInEmail = prefs.getString("user_email", "");
         }
 
-        // 2. Fetch the actual student ID row index integer
         int currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
 
-        // 3. FIXED: Properly matching the updated 4-argument constructor signature cleanly
         if (recyclerView != null) {
             recyclerView.setAdapter(new ListingAdapter(filteredList, getContext(), currentUserId, this));
         }
@@ -219,7 +214,8 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
     private void setupUserGreeting() {
         if (getActivity() == null || tvGreetingTitle == null) return;
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String userName = dbHelper.getUserNameByEmail(prefs.getString("user_email", ""));
+        String userEmail = prefs.getString("user_email", "");
+        String userName = dbHelper.getUserNameByEmail(userEmail);
 
         if (userName != null && !userName.isEmpty()) {
             String formatted = userName.substring(0, 1).toUpperCase() + userName.substring(1);
@@ -227,9 +223,30 @@ public class HomeExploreFragment extends Fragment implements ListingAdapter.OnLi
         } else {
             tvGreetingTitle.setText(getString(R.string.welcome_guest));
         }
+
+        // 🛠️ DYNAMIC SMART IMAGE PARSER FOR HOME AVATAR
+        if (ivHomeAvatar != null && !userEmail.isEmpty()) {
+            Cursor cursor = dbHelper.getStudentProfileByEmail(userEmail);
+            if (cursor != null && cursor.moveToFirst()) {
+                String imgPath = cursor.getString(5); // ProfileImage index location
+                if (imgPath != null && !imgPath.trim().isEmpty()) {
+                    int resId = getResources().getIdentifier(imgPath, "drawable", getActivity().getPackageName());
+                    if (resId != 0) {
+                        // Successfully matched a local mock asset name string
+                        ivHomeAvatar.setImageResource(resId);
+                    } else {
+                        // Fallback: Parse string path as device content URI
+                        ivHomeAvatar.setImageURI(Uri.parse(imgPath));
+                    }
+                } else {
+                    // Fallback avatar design if the profile column path value is empty
+                    ivHomeAvatar.setImageResource(android.R.drawable.ic_menu_gallery);
+                }
+                cursor.close();
+            }
+        }
     }
 
-    // ListingAdapter Click Listeners
     @Override
     public void onItemClick(Listing listing) {
         if (getContext() == null || listing == null) return;

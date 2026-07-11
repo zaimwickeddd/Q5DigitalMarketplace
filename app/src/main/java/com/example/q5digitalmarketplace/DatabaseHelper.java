@@ -12,7 +12,8 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Q5Marketplace.db";
-    private static final int DATABASE_VERSION = 22; // 🛠️ Bumped to Version 22 for Notifications table
+    // 🛠️ BUMPED TO VERSION 24: Forces schema rebuild to clear old structures and apply new wishlist mock seed entries
+    private static final int DATABASE_VERSION = 24;
 
     public static final String TABLE_LISTINGS = "listings";
     public static final String COLUMN_ID = "id";
@@ -97,16 +98,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (oldVersion < 22) {
-            db.execSQL("CREATE TABLE IF NOT EXISTS Notifications (" +
-                    "NotifID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "UserID INTEGER, " +
-                    "Title TEXT, " +
-                    "Message TEXT, " +
-                    "Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                    "IsRead INTEGER DEFAULT 0, " +
-                    "FOREIGN KEY(UserID) REFERENCES Student(StuID));");
-        }
+        db.execSQL("DROP TABLE IF EXISTS Wishlist");
+        db.execSQL("DROP TABLE IF EXISTS Notifications");
+        db.execSQL("DROP TABLE IF EXISTS Seller");
+        db.execSQL("DROP TABLE IF EXISTS Buyer");
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LISTINGS);
+        db.execSQL("DROP TABLE IF EXISTS Student");
+        onCreate(db);
     }
 
     // --- Listing Operations ---
@@ -352,19 +350,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return fetchListings(query, new String[]{String.valueOf(sellerId), status});
     }
 
-    public int getListingsCount() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        int count = 0;
-        Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM " + TABLE_LISTINGS, null);
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                count = cursor.getInt(0);
-            }
-            cursor.close();
-        }
-        return count;
-    }
-
     public boolean isWishlisted(int buyerId, int itemId) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM Wishlist WHERE BuyerID = ? AND ItemID = ?", new String[]{String.valueOf(buyerId), String.valueOf(itemId)});
@@ -512,7 +497,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (cursor.moveToFirst()) {
             do {
-                list.add(new Listing(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_FACULTY)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)), cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SELLER_ID)), cursor.getString(cursor.getColumnIndexOrThrow("status"))));
+                list.add(new Listing(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRICE)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CATEGORY)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CONDITION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGE_RES)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)), cursor.getString(cursor.getColumnIndexOrThrow(cursor.getColumnIndexOrThrow(COLUMN_FACULTY) >= 0 ? COLUMN_FACULTY : COLUMN_DESCRIPTION)), cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TYPE)), cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SELLER_ID)), cursor.getString(cursor.getColumnIndexOrThrow("status"))));
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -549,69 +534,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("UPDATE " + TABLE_LISTINGS + " SET " + COLUMN_WHATSAPP_CLICKS + " = " + COLUMN_WHATSAPP_CLICKS + " + 1 " + " WHERE " + COLUMN_ID + " = ?", new String[]{String.valueOf(listingId)});
     }
 
-    private void insertMockData(SQLiteDatabase db) {
-        ContentValues values = new ContentValues();
-
-        // 1. Lenovo LOQ Laptop
-        values.put(COLUMN_TITLE, "Lenovo LOQ Laptop");
-        values.put(COLUMN_PRICE, "1500.00");
-        values.put(COLUMN_CATEGORY, "Electronics");
-        values.put(COLUMN_CONDITION, "Used");
-        values.put(COLUMN_IMAGE_RES, "lenovo_loq");
-        values.put(COLUMN_DESCRIPTION, "Powerful gaming laptop, perfect for programming and FYP tasks. 16GB RAM.");
-        values.put(COLUMN_FACULTY, "FSKM");
-        values.put(COLUMN_SELLER_ID, 101);
-        values.put("status", "Active");
-        values.put(COLUMN_TYPE, "Sell");
-        values.put(COLUMN_WHATSAPP_CLICKS, 18);
-        db.insert(TABLE_LISTINGS, null, values);
-        values.clear();
-
-        // 2. Introductory Mandarin Book
-        values.put(COLUMN_TITLE, "Introductory Mandarin Book");
-        values.put(COLUMN_PRICE, "30.00");
-        values.put(COLUMN_CATEGORY, "Books");
-        values.put(COLUMN_CONDITION, "Brand New");
-        values.put(COLUMN_IMAGE_RES, "mandarin_books");
-        values.put(COLUMN_DESCRIPTION, "Official campus textbook for beginner language courses. No markings inside.");
-        values.put(COLUMN_FACULTY, "APB");
-        values.put(COLUMN_SELLER_ID, 102);
-        values.put("status", "Active");
-        values.put(COLUMN_TYPE, "Sell");
-        values.put(COLUMN_WHATSAPP_CLICKS, 6);
-        db.insert(TABLE_LISTINGS, null, values);
-        values.clear();
-
-        // 3. Cabana Vintage Shirt
-        values.put(COLUMN_TITLE, "Cabana Vintage Shirt");
-        values.put(COLUMN_PRICE, "50.00");
-        values.put(COLUMN_CATEGORY, "Clothes");
-        values.put(COLUMN_CONDITION, "Used");
-        values.put(COLUMN_IMAGE_RES, "canaba_shirt");
-        values.put(COLUMN_DESCRIPTION, "Comfortable vintage oversized short sleeve shirt. Size L.");
-        values.put(COLUMN_FACULTY, "FSKM");
-        values.put(COLUMN_SELLER_ID, 101);
-        values.put("status", "Active");
-        values.put(COLUMN_TYPE, "Sell");
-        values.put(COLUMN_WHATSAPP_CLICKS, 11);
-        db.insert(TABLE_LISTINGS, null, values);
-        values.clear();
-
-        // 4. Adidas Originals Backpack
-        values.put(COLUMN_TITLE, "Adidas Originals Backpack");
-        values.put(COLUMN_PRICE, "129.00");
-        values.put(COLUMN_CATEGORY, "Clothes");
-        values.put(COLUMN_CONDITION, "Brand New");
-        values.put(COLUMN_IMAGE_RES, "adidas_backpack");
-        values.put(COLUMN_DESCRIPTION, "Spacious laptop bag. Water-resistant material, ideal for campus walking.");
-        values.put(COLUMN_FACULTY, "FPP");
-        values.put(COLUMN_SELLER_ID, 103);
-        values.put("status", "Active");
-        values.put(COLUMN_TYPE, "Sell");
-        values.put(COLUMN_WHATSAPP_CLICKS, 14);
-        db.insert(TABLE_LISTINGS, null, values);
-    }
-
     public Cursor getItemDistributionCount() {
         SQLiteDatabase db = this.getReadableDatabase();
         return db.rawQuery("SELECT " + COLUMN_CATEGORY + ", COUNT(*) AS TotalCount " + "FROM " + TABLE_LISTINGS + " " + "GROUP BY " + COLUMN_CATEGORY + " " + "ORDER BY TotalCount DESC", null);
@@ -639,11 +561,265 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean updateStudentProfileImage(String email, String imagePath) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        // 🛠️ Updates ONLY the ProfileImage column for this specific student email row
         values.put("ProfileImage", imagePath);
-
         int result = db.update("Student", values, "Email=?", new String[]{email});
         db.close();
         return result > 0;
+    }
+
+    // 🛠️ MOCK DATA SEED ENGINE: SEEDS 4 STUDENTS, 4 SELLERS, 10 OWNER-LINKED LISTINGS, AND 8 WISHLIST CONNECTORS
+    private void insertMockData(SQLiteDatabase db) {
+        ContentValues userValues = new ContentValues();
+
+        // --- Seed 4 Student Profiles ---
+        // 1. Zaim
+        userValues.put("StuID", 1);
+        userValues.put("Name", "Zaim");
+        userValues.put("Email", "zaim@gmail.com");
+        userValues.put("PhoneNum", "0166221844");
+        userValues.put("Password", "1234567");
+        userValues.put("UserType", "S");
+        userValues.put("ProfileImage", "profile_zaim");
+        db.insert("Student", null, userValues);
+        userValues.clear();
+
+        // 2. Nadzim
+        userValues.put("StuID", 2);
+        userValues.put("Name", "Nadzim");
+        userValues.put("Email", "nadzim@gmail.com");
+        userValues.put("PhoneNum", "60128794719");
+        userValues.put("Password", "1234567");
+        userValues.put("UserType", "S");
+        userValues.put("ProfileImage", "profile_nadzim");
+        db.insert("Student", null, userValues);
+        userValues.clear();
+
+        // 3. Karl
+        userValues.put("StuID", 3);
+        userValues.put("Name", "Karl");
+        userValues.put("Email", "karl@gmail.com");
+        userValues.put("PhoneNum", "60137010497");
+        userValues.put("Password", "1234567");
+        userValues.put("UserType", "S");
+        userValues.put("ProfileImage", "profile_karl");
+        db.insert("Student", null, userValues);
+        userValues.clear();
+
+        // 4. Najib
+        userValues.put("StuID", 4);
+        userValues.put("Name", "Najib");
+        userValues.put("Email", "najib@gmail.com");
+        userValues.put("PhoneNum", "0138519619");
+        userValues.put("Password", "1234567");
+        userValues.put("UserType", "S");
+        userValues.put("ProfileImage", "profile_najib");
+        db.insert("Student", null, userValues);
+        userValues.clear();
+
+        // --- Seed 4 Corresponding Stores into Seller Table ---
+        ContentValues sellerValues = new ContentValues();
+
+        sellerValues.put("SellerID", 1);
+        sellerValues.put("StoreBio", "Zaim's Academic Bookstore & Reference Manuals");
+        db.insert("Seller", null, sellerValues);
+        sellerValues.clear();
+
+        sellerValues.put("SellerID", 2);
+        sellerValues.put("StoreBio", "Nadzim's Tech Corner - Keyboards & Coding Supplies");
+        db.insert("Seller", null, sellerValues);
+        sellerValues.clear();
+
+        sellerValues.put("SellerID", 3);
+        sellerValues.put("StoreBio", "Karl's Thrift Hub - Vintage Streetwear & Kits");
+        db.insert("Seller", null, sellerValues);
+        sellerValues.clear();
+
+        sellerValues.put("SellerID", 4);
+        sellerValues.put("StoreBio", "Najib's Engineering Gear & Digital Electronics Hub");
+        db.insert("Seller", null, sellerValues);
+        sellerValues.clear();
+
+        // --- Seed Exactly 10 Relational Item Listings linked to Owners ---
+        ContentValues values = new ContentValues();
+
+        // Item 1: Lenovo LOQ Laptop (Seller 4: Najib)
+        values.put(COLUMN_TITLE, "Lenovo LOQ Laptop");
+        values.put(COLUMN_PRICE, "1500.00");
+        values.put(COLUMN_CATEGORY, "Electronics");
+        values.put(COLUMN_CONDITION, "Used");
+        values.put(COLUMN_IMAGE_RES, "lenovo_loq");
+        values.put(COLUMN_DESCRIPTION, "Powerful gaming laptop, perfect for programming and FYP tasks. 16GB RAM.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 4);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 18);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 2: Introductory Mandarin Book (Seller 1: Zaim)
+        values.put(COLUMN_TITLE, "Introductory Mandarin Book");
+        values.put(COLUMN_PRICE, "30.00");
+        values.put(COLUMN_CATEGORY, "Books");
+        values.put(COLUMN_CONDITION, "Brand New");
+        values.put(COLUMN_IMAGE_RES, "mandarin_books");
+        values.put(COLUMN_DESCRIPTION, "Official campus textbook for beginner language courses. No markings inside.");
+        values.put(COLUMN_FACULTY, "APB");
+        values.put(COLUMN_SELLER_ID, 1);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 6);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 3: Cabana Vintage Shirt (Seller 3: Karl)
+        values.put(COLUMN_TITLE, "Cabana Vintage Shirt");
+        values.put(COLUMN_PRICE, "50.00");
+        values.put(COLUMN_CATEGORY, "Clothes");
+        values.put(COLUMN_CONDITION, "Used");
+        values.put(COLUMN_IMAGE_RES, "canaba_shirt");
+        values.put(COLUMN_DESCRIPTION, "Comfortable vintage oversized short sleeve shirt. Size L.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 3);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 11);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 4: Adidas Originals Backpack (Seller 3: Karl)
+        values.put(COLUMN_TITLE, "Adidas Originals Backpack");
+        values.put(COLUMN_PRICE, "129.00");
+        values.put(COLUMN_CATEGORY, "Clothes");
+        values.put(COLUMN_CONDITION, "Brand New");
+        values.put(COLUMN_IMAGE_RES, "adidas_backpack");
+        values.put(COLUMN_DESCRIPTION, "Spacious laptop bag. Water-resistant material, ideal for campus walking.");
+        values.put(COLUMN_FACULTY, "FPP");
+        values.put(COLUMN_SELLER_ID, 3);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 14);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 5: Nike Shoes (Seller 4: Najib)
+        values.put(COLUMN_TITLE, "Nike Shoes");
+        values.put(COLUMN_PRICE, "210.00");
+        values.put(COLUMN_CATEGORY, "Sports");
+        values.put(COLUMN_CONDITION, "Used");
+        values.put(COLUMN_IMAGE_RES, "nike_shoes");
+        values.put(COLUMN_DESCRIPTION, "Comfortable high stability running track sneakers. Size UK 9.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 4);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 1);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 6: Wireless Mechanical Keyboard (Seller 2: Nadzim)
+        values.put(COLUMN_TITLE, "Wireless Mechanical Keyboard");
+        values.put(COLUMN_PRICE, "180.00");
+        values.put(COLUMN_CATEGORY, "Electronics");
+        values.put(COLUMN_CONDITION, "Brand New");
+        values.put(COLUMN_IMAGE_RES, "keyboard_res");
+        values.put(COLUMN_DESCRIPTION, "Hot-swappable tactile switches with crisp customizable RGB lighting profiles.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 2);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 9);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 7: Data Structures Textbook (Seller 1: Zaim)
+        values.put(COLUMN_TITLE, "Data Structures Textbook");
+        values.put(COLUMN_PRICE, "45.00");
+        values.put(COLUMN_CATEGORY, "Books");
+        values.put(COLUMN_CONDITION, "Used");
+        values.put(COLUMN_IMAGE_RES, "dsa_book");
+        values.put(COLUMN_DESCRIPTION, "Core reference textbook complete with clean assignment algorithm snippets.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 1);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 12);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 8: Badminton Racket (Seller 3: Karl)
+        values.put(COLUMN_TITLE, "Badminton Racket");
+        values.put(COLUMN_PRICE, "85.00");
+        values.put(COLUMN_CATEGORY, "Sports");
+        values.put(COLUMN_CONDITION, "Used");
+        values.put(COLUMN_IMAGE_RES, "racket_res");
+        values.put(COLUMN_DESCRIPTION, "Ultralight carbon aerodynamic shaft including high tension frame strings.");
+        values.put(COLUMN_FACULTY, "FPP");
+        values.put(COLUMN_SELLER_ID, 3);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 5);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 9: Calculus Study Sheets Pack (Seller 1: Zaim)
+        values.put(COLUMN_TITLE, "Calculus Study Sheets Pack");
+        values.put(COLUMN_PRICE, "15.00");
+        values.put(COLUMN_CATEGORY, "Books");
+        values.put(COLUMN_CONDITION, "Brand New");
+        values.put(COLUMN_IMAGE_RES, "calculus_guide");
+        values.put(COLUMN_DESCRIPTION, "Step-by-step solutions manual helper covering core derivation graphs.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 1);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 3);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // Item 10: Waterproof Travel Backpack (Seller 2: Nadzim)
+        values.put(COLUMN_TITLE, "Waterproof Travel Backpack");
+        values.put(COLUMN_PRICE, "95.00");
+        values.put(COLUMN_CATEGORY, "Clothes");
+        values.put(COLUMN_CONDITION, "Brand New");
+        values.put(COLUMN_IMAGE_RES, "tech_backpack");
+        values.put(COLUMN_DESCRIPTION, "Anti-theft school laptop travel bag with robust rain protective layers.");
+        values.put(COLUMN_FACULTY, "FSKM");
+        values.put(COLUMN_SELLER_ID, 2);
+        values.put("status", "Active");
+        values.put(COLUMN_TYPE, "Sell");
+        values.put(COLUMN_WHATSAPP_CLICKS, 15);
+        db.insert(TABLE_LISTINGS, null, values);
+        values.clear();
+
+        // --- 🛠️ TASK EXTENSION: SEED EXPLICIT FAVORITES MAPPING DATA ---
+        ContentValues wishlistValues = new ContentValues();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+        String currentDate = sdf.format(new java.util.Date());
+
+        // 1. Zaim (Buyer 1) favorites Najib's Laptop (Item 1) and Nadzim's Keyboard (Item 6)
+        wishlistValues.put("BuyerID", 1); wishlistValues.put("ItemID", 1); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+        wishlistValues.put("BuyerID", 1); wishlistValues.put("ItemID", 6); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+
+        // 2. Nadzim (Buyer 2) favorites Karl's Backpack (Item 4) and Najib's Shoes (Item 5)
+        wishlistValues.put("BuyerID", 2); wishlistValues.put("ItemID", 4); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+        wishlistValues.put("BuyerID", 2); wishlistValues.put("ItemID", 5); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+
+        // 3. Karl (Buyer 3) favorites Zaim's Mandarin Book (Item 2) and Najib's Laptop (Item 1)
+        wishlistValues.put("BuyerID", 3); wishlistValues.put("ItemID", 2); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+        wishlistValues.put("BuyerID", 3); wishlistValues.put("ItemID", 1); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+
+        // 4. Najib (Buyer 4) favorites Karl's Backpack (Item 4) and Zaim's Data Structures Book (Item 7)
+        // Note: Najib favoriting Item 4 makes testing the "Mark as Sold" feature instant!
+        wishlistValues.put("BuyerID", 4); wishlistValues.put("ItemID", 4); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
+        wishlistValues.put("BuyerID", 4); wishlistValues.put("ItemID", 7); wishlistValues.put("Date_Added", currentDate);
+        db.insert("Wishlist", null, wishlistValues); wishlistValues.clear();
     }
 }

@@ -21,6 +21,7 @@ public class NotificationsFragment extends Fragment {
     private NotificationAdapter adapter;
     private DatabaseHelper dbHelper;
     private LinearLayout layoutEmpty;
+    private Cursor currentCursor; // 🛠️ ADDED: Tracks the cursor lifecycle to prevent memory resource leaks
 
     @Nullable
     @Override
@@ -36,13 +37,26 @@ public class NotificationsFragment extends Fragment {
 
         btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
 
-        loadNotifications();
-        markAllAsRead();
-
         return view;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // 🛠️ MOVED: Running these procedures inside onViewCreated ensures layout bindings are fully ready
+        loadNotifications();
+        markAllAsRead();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Force evaluation updates if the viewport is re-entered from a backstack pop action
+        loadNotifications();
+    }
+
     private void markAllAsRead() {
+        if (getActivity() == null) return;
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String email = prefs.getString("user_email", null);
         if (email != null) {
@@ -52,27 +66,43 @@ public class NotificationsFragment extends Fragment {
     }
 
     private void loadNotifications() {
+        if (getActivity() == null) return;
         SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String email = prefs.getString("user_email", null);
-        
+
         if (email != null) {
             int userId = dbHelper.getStuIDByEmail(email);
-            Cursor cursor = dbHelper.getNotifications(userId);
 
-            if (cursor != null && cursor.getCount() > 0) {
+            // Close any existing open cursor structure before requesting a fresh data query instance
+            if (currentCursor != null && !currentCursor.isClosed()) {
+                currentCursor.close();
+            }
+
+            currentCursor = dbHelper.getNotifications(userId);
+
+            if (currentCursor != null && currentCursor.getCount() > 0) {
                 rvNotifications.setVisibility(View.VISIBLE);
                 layoutEmpty.setVisibility(View.GONE);
-                
+
                 if (adapter == null) {
-                    adapter = new NotificationAdapter(cursor);
+                    adapter = new NotificationAdapter(currentCursor);
                     rvNotifications.setAdapter(adapter);
                 } else {
-                    adapter.updateCursor(cursor);
+                    adapter.updateCursor(currentCursor);
                 }
             } else {
                 rvNotifications.setVisibility(View.GONE);
                 layoutEmpty.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // 🛠️ FIXED: Safely close database cursor handles to protect application memory structures
+        if (currentCursor != null && !currentCursor.isClosed()) {
+            currentCursor.close();
         }
     }
 }
