@@ -111,6 +111,10 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="end"
+        android:background="@color/colorSurface"
+        app:itemIconPadding="24dp"
+        app:itemIconTint="@color/textColorPrimary"
+        app:itemTextColor="@color/textColorPrimary"
         app:menu="@menu/filter_sidebar_menu" />
 
 </androidx.drawerlayout.widget.DrawerLayout>
