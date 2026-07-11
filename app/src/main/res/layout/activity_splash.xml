@@ -23,32 +23,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="160dp"
-            android:layout_height="160dp"
-            android:src="@drawable/loginpeople"
-            app:tint="#06B6D4"
-            android:contentDescription="App Logo" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Q5 Digital"
-            android:textColor="#F9FAFB"
-            android:textSize="32sp"
-            android:fontFamily="sans-serif-black"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <ProgressBar
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="32dp"
-            android:indeterminateTint="#06B6D4" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

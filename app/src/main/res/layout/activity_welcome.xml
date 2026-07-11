@@ -31,33 +31,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Q5 Digital"
-            android:textColor="#F9FAFB"
-            android:textSize="42sp"
-            android:fontFamily="sans-serif-black"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Marketplace"
-            android:textColor="#06B6D4"
-            android:textSize="24sp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginTop="-8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Buy and sell digital assets with ease"
-            android:textColor="#9CA3AF"
-            android:textSize="14sp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="48dp" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnWelcomeLogin"
             android:layout_width="match_parent"
