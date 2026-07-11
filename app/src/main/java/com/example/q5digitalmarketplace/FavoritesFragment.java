@@ -9,10 +9,11 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class FavoritesFragment extends Fragment implements ListingAdapter.OnList
 
     private DatabaseHelper dbHelper;
     private RecyclerView recyclerView;
+    private LinearLayout layoutEmpty; // 🛠️ ADDED: Handles display switching when list is empty
     private ListingAdapter adapter;
     private List<Listing> favoriteListings = new ArrayList<>();
     private int currentUserId;
@@ -32,18 +34,29 @@ public class FavoritesFragment extends Fragment implements ListingAdapter.OnList
 
         dbHelper = new DatabaseHelper(getContext());
         recyclerView = view.findViewById(R.id.rv_favorite_items);
+        layoutEmpty = view.findViewById(R.id.layout_empty_favorites);
 
-        // 1. Get current logged-in user profile identity metrics safely
+        // Get current logged-in user profile identity metrics safely
         if (getActivity() != null) {
             SharedPreferences prefs = getActivity().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
             String loggedInEmail = prefs.getString("user_email", "");
             currentUserId = dbHelper.getStuIDByEmail(loggedInEmail);
         }
 
-        // 2. Setup Single Column Vertical List matching modernized layout theme
-        recyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(getContext()));
+        // Setup Single Column Vertical List matching modernized layout theme
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // 3. Spacing Decorator for list items
+        // Wire up header back navigation bar action controls
+        View btnBack = view.findViewById(R.id.btn_back_favorites);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> {
+                if (getParentFragmentManager() != null) {
+                    getParentFragmentManager().popBackStack();
+                }
+            });
+        }
+
+        // Spacing Decorator for list items
         int spacing = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 12, getResources().getDisplayMetrics());
         recyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
@@ -70,10 +83,19 @@ public class FavoritesFragment extends Fragment implements ListingAdapter.OnList
             favoriteListings = new ArrayList<>();
         }
 
-        // Instantiate adapter using the precise 4-argument constructor contract
-        adapter = new ListingAdapter(favoriteListings, getContext(), currentUserId, this);
-        if (recyclerView != null) {
-            recyclerView.setAdapter(adapter);
+        // 🛠️ FIXED: Programmatic rendering switch check block added to toggle layouts
+        if (!favoriteListings.isEmpty()) {
+            recyclerView.setVisibility(View.VISIBLE);
+            if (layoutEmpty != null) layoutEmpty.setVisibility(View.GONE);
+
+            // Instantiate adapter using the precise 4-argument constructor contract
+            adapter = new ListingAdapter(favoriteListings, getContext(), currentUserId, this);
+            if (recyclerView != null) {
+                recyclerView.setAdapter(adapter);
+            }
+        } else {
+            if (recyclerView != null) recyclerView.setVisibility(View.GONE);
+            if (layoutEmpty != null) layoutEmpty.setVisibility(View.VISIBLE);
         }
     }
 

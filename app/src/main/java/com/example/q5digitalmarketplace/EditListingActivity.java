@@ -1,10 +1,14 @@
 package com.example.q5digitalmarketplace;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -23,6 +27,7 @@ import com.google.android.material.card.MaterialCardView;
 
 public class EditListingActivity extends AppCompatActivity {
 
+    private static final String TAG = "EditListingActivity";
     private EditText etTitle, etPrice, etDescription;
     private Spinner spinnerCategory, spinnerCondition, spinnerFaculty;
     private RadioGroup radioGroupType;
@@ -35,12 +40,10 @@ public class EditListingActivity extends AppCompatActivity {
     private int listingId;
     private String currentImagePath;
 
-    // Dropdown configuration arrays
     private final String[] categories = {"Electronics", "Books", "Clothes", "Bags", "Services", "Stationery", "Furniture", "Sports"};
     private final String[] conditions = {"Brand New", "Like New", "Used"};
     private final String[] faculties = {"General", "Faculty of Computer Science", "Faculty of Engineering", "Faculty of Business"};
 
-    // Image Pick Subsystem
     private final ActivityResultLauncher<String> pickImageLauncher = registerForActivityResult(
             new ActivityResultContracts.GetContent(),
             uri -> {
@@ -60,7 +63,6 @@ public class EditListingActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         listingId = getIntent().getIntExtra("LISTING_ID", -1);
 
-        // Bind Views matching your exact XML layout
         MaterialCardView cardAddPhotos = findViewById(R.id.card_add_photos);
         ivImagePreview = findViewById(R.id.iv_image_preview);
         layoutPlaceholder = findViewById(R.id.layout_placeholder);
@@ -80,23 +82,17 @@ public class EditListingActivity extends AppCompatActivity {
 
         MaterialButton btnSave = findViewById(R.id.btn_add_item);
 
-        // Update button text using resource safely
         if (btnSave != null) {
             btnSave.setText(R.string.save_changes);
         }
 
-        // Initialize drop selectors
         setupSpinner(spinnerCategory, categories);
         setupSpinner(spinnerCondition, conditions);
         setupSpinner(spinnerFaculty, faculties);
 
-        // Character counter logic matching creation mechanics
         setupCharCounter();
-
-        // Load existing product record data
         loadListingData();
 
-        // Register action nodes
         if (cardAddPhotos != null) {
             cardAddPhotos.setOnClickListener(v -> pickImageLauncher.launch("image/*"));
         }
@@ -118,14 +114,11 @@ public class EditListingActivity extends AppCompatActivity {
         etDescription.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 tvCharCounter.setText(s.length() + "/300");
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
     }
 
@@ -147,21 +140,46 @@ public class EditListingActivity extends AppCompatActivity {
             if (etPrice != null) etPrice.setText(listing.getPrice());
             if (etDescription != null) etDescription.setText(listing.getDescription());
 
-            // Image visibility logic mapping
             currentImagePath = listing.getImagePath();
-            if (currentImagePath != null && !currentImagePath.isEmpty()) {
-                ivImagePreview.setImageURI(Uri.parse(currentImagePath));
-                showImagePreview(true);
+
+            // 🛠️ PROBLEM 2 FIXED: Smart multi-format image loader applied to form layout previews
+            if (currentImagePath != null && !currentImagePath.trim().isEmpty()) {
+                String cleanImg = currentImagePath.trim();
+                try {
+                    int imageResId = getResources().getIdentifier(cleanImg, "drawable", getPackageName());
+
+                    if (imageResId != 0) {
+                        ivImagePreview.setImageResource(imageResId);
+                        showImagePreview(true);
+                    } else if (cleanImg.startsWith("content://") || cleanImg.startsWith("file://") || cleanImg.startsWith("/")) {
+                        ivImagePreview.setImageURI(Uri.parse(cleanImg));
+                        showImagePreview(true);
+                    } else {
+                        // Handle Base64 strings safely if applicable
+                        if (cleanImg.contains(",")) {
+                            cleanImg = cleanImg.substring(cleanImg.indexOf(",") + 1);
+                        }
+                        byte[] decodedBytes = Base64.decode(cleanImg, Base64.DEFAULT);
+                        Bitmap decodedBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                        if (decodedBitmap != null) {
+                            ivImagePreview.setImageBitmap(decodedBitmap);
+                            showImagePreview(true);
+                        } else {
+                            showImagePreview(false);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed parsing modification image asset path", e);
+                    showImagePreview(false);
+                }
             } else {
                 showImagePreview(false);
             }
 
-            // Map Dropdown index targets
             setSpinnerSelection(spinnerCategory, categories, listing.getCategory());
             setSpinnerSelection(spinnerCondition, conditions, listing.getCondition());
             setSpinnerSelection(spinnerFaculty, faculties, listing.getFaculty());
 
-            // Map Radio group status target values
             String typeValue = listing.getType();
             if (typeValue != null) {
                 if (typeValue.equalsIgnoreCase("Buy") && radioBuy != null) {
@@ -195,7 +213,6 @@ public class EditListingActivity extends AppCompatActivity {
         String updatedCondition = spinnerCondition != null ? spinnerCondition.getSelectedItem().toString() : "";
         String updatedFaculty = spinnerFaculty != null ? spinnerFaculty.getSelectedItem().toString() : "";
 
-        // Handle Radio selection extraction strings
         String updatedType = "Buy";
         if (radioGroupType != null) {
             int selectedRadioId = radioGroupType.getCheckedRadioButtonId();
@@ -209,10 +226,8 @@ public class EditListingActivity extends AppCompatActivity {
             return;
         }
 
-        // CAROUSELL LOGIC ENGAGED: Check for modifications and trigger alerts BEFORE updating the DB row values
         dbHelper.checkAndNotifyPriceChange(this, listingId, updatedPrice, updatedTitle);
 
-        // Commit updates down to SQLite
         boolean success = dbHelper.updateListing(listingId, updatedTitle, updatedPrice,
                 updatedCategory, updatedCondition, currentImagePath, updatedDescription, updatedFaculty, updatedType);
 

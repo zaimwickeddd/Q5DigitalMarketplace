@@ -25,13 +25,12 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
     private DatabaseHelper dbHelper;
     private int currentUserId;
     private TabLayout tabLayout;
-    private int currentTabPosition = 0; // 0: All, 1: Active, 2: Sold
+    private int currentTabPosition = 0;
 
-    // New variables for search and sorting
     private EditText etSearchBar;
     private ImageButton btnFilter;
     private MyListingsAdapter adapter;
-    private List<Listing> currentTabList = new ArrayList<>(); // Master reference for the current tab
+    private List<Listing> currentTabList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,32 +42,29 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
         tabLayout = findViewById(R.id.tab_layout);
         rvListings.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initialize new search and filter widgets
         etSearchBar = findViewById(R.id.et_search_bar);
         btnFilter = findViewById(R.id.btn_filter_list);
+
+        // 🛠️ FIXED: Bind click listener to the toolbar back navigation arrow element to prevent crashes
+        View btnBackListings = findViewById(R.id.btn_back_listings);
+        if (btnBackListings != null) {
+            btnBackListings.setOnClickListener(v -> finish());
+        }
 
         SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String email = prefs.getString("user_email", "");
         currentUserId = dbHelper.getStuIDByEmail(email);
 
-        // Setup real-time typing listener for the search bar
         etSearchBar.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filterList(s.toString());
             }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
+            @Override public void afterTextChanged(Editable s) {}
         });
 
-        // Setup drop-down option menu for sorting configuration rules
         btnFilter.setOnClickListener(this::showFilterPopupMenu);
 
-        // Setup Tab Listener for 3 tabs
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -87,7 +83,6 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
     }
 
     private void loadListings() {
-        // Query SQLite database snapshots according to selected filter tab layout
         if (currentTabPosition == 0) {
             currentTabList = dbHelper.getListingsBySellerId(currentUserId);
         } else {
@@ -95,7 +90,6 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
             currentTabList = dbHelper.getListingsBySellerIdAndStatus(currentUserId, status);
         }
 
-        // Reset adapter object tracker to clean view binding configurations when swapping datasets
         adapter = null;
         filterList(etSearchBar.getText().toString());
     }
@@ -105,14 +99,12 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
 
         if (currentTabList != null) {
             for (Listing item : currentTabList) {
-                // Character match search query (Case-insensitive)
                 if (item.getTitle().toLowerCase().contains(query.toLowerCase().trim())) {
                     filteredList.add(item);
                 }
             }
         }
 
-        // Update list states and fallbacks visually
         if (!filteredList.isEmpty()) {
             rvListings.setVisibility(View.VISIBLE);
             findViewById(R.id.layout_empty).setVisibility(View.GONE);
@@ -121,14 +113,13 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
                 adapter = new MyListingsAdapter(filteredList, this);
                 rvListings.setAdapter(adapter);
             } else {
-                adapter.updateList(filteredList); // Light-speed update without losing view positions
+                adapter.updateList(filteredList);
             }
         } else {
             rvListings.setVisibility(View.GONE);
             findViewById(R.id.layout_empty).setVisibility(View.VISIBLE);
 
             findViewById(R.id.btn_create_listing).setOnClickListener(v -> {
-                // Return to CreateListingFragment in MainActivity
                 finish();
             });
         }
@@ -152,14 +143,12 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
                 Collections.sort(currentTabList, (o1, o2) -> Double.compare(extractPrice(o2.getPrice()), extractPrice(o1.getPrice())));
             }
 
-            // Re-apply current text query matching to the newly arranged sequence layout
             filterList(etSearchBar.getText().toString());
             return true;
         });
         popup.show();
     }
 
-    // Helper method to safely extract raw numbers out of price text strings (e.g., "RM 150.50" -> 150.50)
     private double extractPrice(String priceStr) {
         try {
             if (priceStr == null) return 0.0;
@@ -172,6 +161,13 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
 
     @Override
     public void onEdit(Listing listing) {
+        // Security validation guard to prevent editing sold listings
+        Listing freshRecord = dbHelper.getListingById(listing.getId());
+        if (freshRecord != null && "Sold".equalsIgnoreCase(freshRecord.getStatus())) {
+            Toast.makeText(this, "Sold items are archived and cannot be edited.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
         Intent intent = new Intent(this, EditListingActivity.class);
         intent.putExtra("LISTING_ID", listing.getId());
         startActivity(intent);
@@ -192,11 +188,11 @@ public class MyListingsActivity extends AppCompatActivity implements ListingAdap
 
     @Override
     public void onMarkSold(Listing listing) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        // Added dark theme style wrapper parameter to ensure text visibility
+        new androidx.appcompat.app.AlertDialog.Builder(this, com.google.android.material.R.style.Theme_Material3_Dark_Dialog_Alert)
                 .setTitle("Mark as Sold")
                 .setMessage("Are you sure you want to mark this item as sold? It will be moved to your 'Sold' tab.")
                 .setPositiveButton("Mark Sold", (dialog, which) -> {
-                    // 🛠️ Correctly mark as sold and trigger notifications to interested buyers
                     dbHelper.markItemAsSold(this, listing.getId(), listing.getTitle());
                     Toast.makeText(this, "Marked as sold!", Toast.LENGTH_SHORT).show();
                     loadListings();

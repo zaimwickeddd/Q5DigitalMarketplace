@@ -1,14 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 🛠️ FIXED: Replaced root layout with a vertical LinearLayout and added fitsSystemWindows="true" for status bar padding -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212">
+    android:background="#121212"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
+    <!-- 🛠️ FIXED: Added the exact matching 80dp Dark Theme Header Toolbar framework -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#1E1E2A"
+        app:cardCornerRadius="0dp"
+        app:cardElevation="4dp"
+        app:strokeWidth="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:paddingHorizontal="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="My Profile"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Scrollable content layout container -->
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:overScrollMode="never"
         android:background="#121212">
 
@@ -18,11 +47,11 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!--  Profile Header  -->
+            <!--  Profile Details Container Layout Row  -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="8dp">
 
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/cv_profile_avatar"
@@ -48,7 +77,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        android:contentDescription="Profile Photo" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
@@ -94,7 +124,8 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:src="@android:drawable/ic_menu_edit"
-                        app:tint="#F9FAFB" />
+                        app:tint="#F9FAFB"
+                        android:contentDescription="Edit Button Image" />
                 </com.google.android.material.card.MaterialCardView>
             </RelativeLayout>
 
@@ -221,7 +252,8 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 android:src="@android:drawable/ic_menu_sort_by_size"
-                                app:tint="#06B6D4" />
+                                app:tint="#06B6D4"
+                                android:contentDescription="Analytics Icon" />
                         </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
@@ -254,7 +286,8 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@android:drawable/ic_media_next"
-                            app:tint="#9CA3AF" />
+                            app:tint="#9CA3AF"
+                            android:contentDescription="Next" />
                     </RelativeLayout>
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
@@ -285,7 +318,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <!--  My Listings Container Row with ID  -->
+                    <!--  My Listings Row  -->
                     <RelativeLayout
                         android:id="@+id/rl_my_listings"
                         android:layout_width="match_parent"
@@ -309,7 +342,8 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_box_outline"
-                                app:tint="#F9FAFB" />
+                                app:tint="#F9FAFB"
+                                android:contentDescription="Listings Icon" />
                         </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
@@ -342,7 +376,8 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@android:drawable/ic_media_next"
-                            app:tint="#9CA3AF" />
+                            app:tint="#9CA3AF"
+                            android:contentDescription="Next" />
                     </RelativeLayout>
 
                     <View
@@ -351,7 +386,7 @@
                         android:layout_marginHorizontal="20dp"
                         android:background="#2A2A35" />
 
-                    <!--  My Favourites  -->
+                    <!--  My Favourites Row  -->
                     <RelativeLayout
                         android:id="@+id/rl_my_favourites"
                         android:layout_width="match_parent"
@@ -375,7 +410,8 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_heart_outline"
-                                app:tint="#F9FAFB" />
+                                app:tint="#F9FAFB"
+                                android:contentDescription="Favourites Icon" />
                         </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
@@ -408,7 +444,8 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@android:drawable/ic_media_next"
-                            app:tint="#9CA3AF" />
+                            app:tint="#9CA3AF"
+                            android:contentDescription="Next" />
                     </RelativeLayout>
 
                     <View
@@ -417,7 +454,7 @@
                         android:layout_marginHorizontal="20dp"
                         android:background="#2A2A35" />
 
-                    <!--  Account Setting  -->
+                    <!--  Account Settings Row  -->
                     <RelativeLayout
                         android:id="@+id/rl_account_settings"
                         android:layout_width="match_parent"
@@ -441,7 +478,8 @@
                                 android:layout_height="24dp"
                                 android:layout_gravity="center"
                                 android:src="@drawable/ic_settings_outline"
-                                app:tint="#F9FAFB" />
+                                app:tint="#F9FAFB"
+                                android:contentDescription="Settings Icon" />
                         </com.google.android.material.card.MaterialCardView>
 
                         <LinearLayout
@@ -474,11 +512,13 @@
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
                             android:src="@android:drawable/ic_media_next"
-                            app:tint="#9CA3AF" />
+                            app:tint="#9CA3AF"
+                            android:contentDescription="Next" />
                     </RelativeLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!--  Sign Out Action Button  -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_sign_out"
                 android:layout_width="match_parent"
@@ -497,6 +537,7 @@
                 app:iconSize="24dp"
                 app:iconTint="#EF4444" />
 
+            <!--  App Version Banner Info  -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -508,4 +549,4 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,7 +20,7 @@ public class NotificationsFragment extends Fragment {
     private NotificationAdapter adapter;
     private DatabaseHelper dbHelper;
     private LinearLayout layoutEmpty;
-    private Cursor currentCursor; // 🛠️ ADDED: Tracks the cursor lifecycle to prevent memory resource leaks
+    private Cursor currentCursor; // Tracks the cursor lifecycle to prevent memory resource leaks
 
     @Nullable
     @Override
@@ -31,11 +30,15 @@ public class NotificationsFragment extends Fragment {
         dbHelper = new DatabaseHelper(getContext());
         rvNotifications = view.findViewById(R.id.rv_notifications);
         layoutEmpty = view.findViewById(R.id.layout_empty_notif);
-        ImageButton btnBack = view.findViewById(R.id.btn_back_notif);
+
+        // 🛠️ FIXED: Changed type from ImageButton to View to prevent ClassCastException crash
+        View btnBack = view.findViewById(R.id.btn_back_notif);
 
         rvNotifications.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        }
 
         return view;
     }
@@ -43,7 +46,7 @@ public class NotificationsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // 🛠️ MOVED: Running these procedures inside onViewCreated ensures layout bindings are fully ready
+        // Running these procedures inside onViewCreated ensures layout bindings are fully ready
         loadNotifications();
         markAllAsRead();
     }
@@ -100,7 +103,7 @@ public class NotificationsFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // 🛠️ FIXED: Safely close database cursor handles to protect application memory structures
+        // Safely close database cursor handles to protect application memory structures
         if (currentCursor != null && !currentCursor.isClosed()) {
             currentCursor.close();
         }

@@ -29,7 +29,7 @@ public class CreateListingFragment extends Fragment {
 
     private EditText etTitle, etPrice, etDescription;
     private Spinner spinnerCategory, spinnerCondition, spinnerFaculty;
-    private RadioGroup radioGroupType; // New UI element
+    private RadioGroup radioGroupType;
     private TextView tvCharCounter;
     private ImageView ivImagePreview;
     private LinearLayout layoutPlaceholder;
@@ -59,7 +59,7 @@ public class CreateListingFragment extends Fragment {
         etTitle = view.findViewById(R.id.et_item_title);
         etPrice = view.findViewById(R.id.et_item_price);
         etDescription = view.findViewById(R.id.et_item_description);
-        radioGroupType = view.findViewById(R.id.radio_group_type); // Make sure this exists in your XML
+        radioGroupType = view.findViewById(R.id.radio_group_type);
         tvCharCounter = view.findViewById(R.id.tv_char_counter);
         ivImagePreview = view.findViewById(R.id.iv_image_preview);
         layoutPlaceholder = view.findViewById(R.id.layout_placeholder);
@@ -70,6 +70,8 @@ public class CreateListingFragment extends Fragment {
 
         setupDropdowns();
         setupDescriptionCounter();
+
+        // 🛠️ FIXED: Removed the btn_back_create_listing search declaration and event binding block
 
         view.findViewById(R.id.card_add_photos).setOnClickListener(v ->
                 pickMedia.launch(new PickVisualMediaRequest.Builder()
@@ -90,9 +92,9 @@ public class CreateListingFragment extends Fragment {
                 "Clothes",
                 "Bags",
                 "Services",
-                "Stationery",    // New category
-                "Furniture",     // New category
-                "Sports"         // New category
+                "Stationery",
+                "Furniture",
+                "Sports"
         });
         initSpinner(spinnerCondition, new String[]{"Select Condition", "Brand New", "Like New", "Used"});
         initSpinner(spinnerFaculty, new String[]{"Select Faculty", "Faculty of Computer Science", "Faculty of Engineering", "Faculty of Business"});
@@ -110,7 +112,9 @@ public class CreateListingFragment extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                tvCharCounter.setText(getString(R.string.char_counter_template, s.length()));
+                if (tvCharCounter != null) {
+                    tvCharCounter.setText(getString(R.string.char_counter_template, s.length()));
+                }
             }
             @Override
             public void afterTextChanged(Editable s) {}
@@ -127,7 +131,6 @@ public class CreateListingFragment extends Fragment {
             return;
         }
 
-        // Validate RadioGroup
         if (radioGroupType.getCheckedRadioButtonId() == -1) {
             Toast.makeText(getContext(), "Please select Buy or Rent.", Toast.LENGTH_SHORT).show();
             return;
@@ -151,7 +154,6 @@ public class CreateListingFragment extends Fragment {
 
         String finalPrice = priceInput.toUpperCase().startsWith("RM") ? priceInput : "RM " + priceInput;
 
-        // Use the 9-argument constructor (Optimized Creation Constructor)
         Listing newListing = new Listing(title, finalPrice, category, condition, selectedImageUriStr, description, faculty, type, sellerId);
         newListing.setStatus("Active");
 
@@ -174,6 +176,8 @@ public class CreateListingFragment extends Fragment {
         spinnerCategory.setSelection(0);
         spinnerCondition.setSelection(0);
         spinnerFaculty.setSelection(0);
-        tvCharCounter.setText(getString(R.string.char_counter_template, 0));
+        if (tvCharCounter != null) {
+            tvCharCounter.setText(getString(R.string.char_counter_template, 0));
+        }
     }
 }

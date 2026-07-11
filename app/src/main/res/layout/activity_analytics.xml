@@ -1,172 +1,246 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://tools.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#121212"
-    android:padding="20dp"
-    android:fitsSystemWindows="true"
-    tools:context=".AnalyticsActivity">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
-    <TextView
-        android:id="@+id/tv_analytics_header"
-        android:layout_width="wrap_content"
+    <!-- Top Bar Toolbar Header -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="My Shop Analytics"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="#F9FAFB"/>
+        app:cardCornerRadius="0dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#1E1E2A">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Buyer interest insights for your listings"
-        android:textSize="13sp"
-        android:textColor="#9CA3AF"
-        android:layout_marginBottom="24dp"/>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:paddingHorizontal="16dp">
 
-    <com.google.android.material.card.MaterialCardView
+            <!-- 🛠️ FIXED: Exact ID match for the back button -->
+            <ImageView
+                android:id="@+id/btn_back_analytics"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="My Shop Analytics"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Scrollable content area -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:cardBackgroundColor="#1E1E2A"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:strokeColor="#2A2A35"
-        app:strokeWidth="1dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark">
+        android:overScrollMode="never">
 
-        <FrameLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/tvNoData"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="No analytics data available yet. List an item to start tracking!"
-                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="16dp"
+                android:text="Buyer interest insights for your listings"
+                android:textColor="#9CA3AF"
+                android:textSize="14sp" />
+
+            <!-- SECTION 1: Category Performance (Horizontal Bar Chart) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:text="Category Performance"
                 android:textColor="#9CA3AF"
                 android:textSize="14sp"
-                android:visibility="gone"/>
+                android:textStyle="bold" />
 
-            <ScrollView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbars="none">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#1E1E2A"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#2A2A35"
+                app:strokeWidth="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Category Performance"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#F9FAFB"/>
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Total clicks by item category"
-                        android:textSize="12sp"
                         android:textColor="#9CA3AF"
+                        android:textSize="12sp"
                         android:layout_marginBottom="12dp"/>
 
-                    <!-- Dynamic container for category bar chart rows -->
+                    <!-- 🛠️ FIXED: Exact ID match for the fallback "No Data" label -->
+                    <TextView
+                        android:id="@+id/tvNoData"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No analytics data recorded yet."
+                        android:textColor="#9CA3AF"
+                        android:textSize="14sp"
+                        android:gravity="center"
+                        android:padding="16dp"
+                        android:visibility="gone" />
+
+                    <!-- 🛠️ FIXED: Exact ID match for the horizontal bars layout list container -->
                     <LinearLayout
                         android:id="@+id/layoutBarsList"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:divider="@android:color/transparent"
-                        android:showDividers="middle"/>
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                    <View
+            <!-- SECTION 2: My Inventory Breakdown (Pie Chart) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:text="My Inventory Breakdown"
+                android:textColor="#9CA3AF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#1E1E2A"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#2A2A35"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:padding="20dp">
+
+                    <TextView
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#2A2A35"
-                        android:layout_marginVertical="24dp"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="My Inventory Breakdown"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#F9FAFB"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Distribution of your listed items"
-                        android:textSize="12sp"
                         android:textColor="#9CA3AF"
+                        android:textSize="12sp"
                         android:layout_marginBottom="16dp"/>
 
+                    <!-- 🛠️ FIXED: Exact ID match for custom PieChartView widget -->
                     <com.example.q5digitalmarketplace.PieChartView
                         android:id="@+id/pieChartView"
-                        android:layout_width="match_parent"
-                        android:layout_height="220dp"
-                        android:layout_gravity="center_horizontal" />
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_marginBottom="20dp" />
 
-                    <!-- Dynamic container for chart legend items -->
+                    <!-- 🛠️ FIXED: Exact ID match for the pie legend container layout -->
                     <LinearLayout
                         android:id="@+id/layoutPieLegend"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginTop="16dp"
-                        android:paddingHorizontal="4dp"/>
+                        android:paddingStart="8dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#2A2A35"
-                        android:layout_marginVertical="24dp"/>
+            <!-- SECTION 3: Item Performance List -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginBottom="8dp"
+                android:text="Item Performance"
+                android:textColor="#9CA3AF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Item Performance"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#F9FAFB"/>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#1E1E2A"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#2A2A35"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:id="@+id/layoutItemPerformance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="WhatsApp clicks per item"
-                        android:textSize="12sp"
                         android:textColor="#9CA3AF"
+                        android:textSize="12sp"
                         android:layout_marginBottom="12dp"/>
 
+                    <!-- 🛠️ FIXED: Exact ID match for item list view container -->
                     <LinearLayout
-                        android:id="@+id/layoutItemPerformance"
+                        android:id="@+id/layoutItemPerformanceList"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
+                        android:orientation="vertical" />
                 </LinearLayout>
-            </ScrollView>
-        </FrameLayout>
-    </com.google.android.material.card.MaterialCardView>
+            </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_back_analytics"
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Bottom Action Button Row Wrapper -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginTop="24dp"
-        android:text="Back to Profile"
-        android:textColor="#121212"
-        android:textStyle="bold"
-        app:backgroundTint="#06B6D4"
-        app:cornerRadius="12dp"/>
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="#1E1E2A">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_back_to_profile"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="BACK TO PROFILE"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#06B6D4"
+            app:cornerRadius="12dp" />
+    </LinearLayout>
 
 </LinearLayout>

@@ -35,7 +35,7 @@ public class AnalyticsActivity extends AppCompatActivity {
         layoutPieLegend = findViewById(R.id.layoutPieLegend);
         layoutItemPerformance = findViewById(R.id.layoutItemPerformance);
 
-        // 🛠️ Fetch the current logged-in user ID to filter analytics data
+        // 🛠— Fetch the current logged-in user ID to filter analytics data
         SharedPreferences prefs = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
         String loggedInEmail = prefs.getString("user_email", null);
         if (loggedInEmail != null) {
@@ -51,32 +51,39 @@ public class AnalyticsActivity extends AppCompatActivity {
         // 3. Render the Individual Item Performance List
         renderItemPerformance();
 
-        // 4. Setup back button action router navigation rule
-        findViewById(R.id.btn_back_analytics).setOnClickListener(v -> {
-            finish(); // Closes this activity window and pops back to the Profile tab screen cleanly
-        });
+        // 4. Setup Toolbar Back Navigation Arrow Click Handler
+        View btnBack = findViewById(R.id.btn_back_analytics);
+        if (btnBack != null) {
+            btnBack.setOnClickListener(v -> finish());
+        }
+
+        // 5. Setup Bottom Primary "BACK TO PROFILE" Action Button Click Handler
+        View btnBackToProfile = findViewById(R.id.btn_back_to_profile);
+        if (btnBackToProfile != null) {
+            btnBackToProfile.setOnClickListener(v -> finish());
+        }
     }
 
     private void renderCategoryChart() {
         if (layoutBarsList == null) return;
         layoutBarsList.removeAllViews();
-        
-        // 🛠️ Filter results by current user's seller ID
+
+        // Filter results by current user's seller ID
         Cursor cursor = dbHelper.getCategoryAnalyticsDataBySeller(currentUserId);
 
         if (cursor == null || cursor.getCount() == 0) {
-            tvNoData.setVisibility(View.VISIBLE);
+            if (tvNoData != null) tvNoData.setVisibility(View.VISIBLE);
             if (cursor != null) cursor.close();
             return;
         }
 
-        tvNoData.setVisibility(View.GONE);
+        if (tvNoData != null) tvNoData.setVisibility(View.GONE);
 
         int maxClicks = 1;
         if (cursor.moveToFirst()) {
-            maxClicks = cursor.getInt(1); 
+            maxClicks = cursor.getInt(1);
         }
-        cursor.moveToPosition(-1); 
+        cursor.moveToPosition(-1);
 
         while (cursor.moveToNext()) {
             String categoryName = cursor.getString(0);
@@ -94,12 +101,12 @@ public class AnalyticsActivity extends AppCompatActivity {
 
             View viewBar = new View(this);
             float ratio = (float) totalCategoryClicks / maxClicks;
-            int barWidth = Math.max((int) (ratio * 600), 25); 
+            int barWidth = Math.max((int) (ratio * 600), 25);
 
             LinearLayout.LayoutParams barParams = new LinearLayout.LayoutParams(barWidth, 40);
             barParams.topMargin = 6;
             viewBar.setLayoutParams(barParams);
-            viewBar.setBackgroundColor(Color.parseColor("#34A853")); 
+            viewBar.setBackgroundColor(Color.parseColor("#34A853"));
 
             rowContainer.addView(viewBar);
             layoutBarsList.addView(rowContainer);
@@ -110,8 +117,8 @@ public class AnalyticsActivity extends AppCompatActivity {
     private void renderPieChartDistribution() {
         if (layoutPieLegend == null) return;
         layoutPieLegend.removeAllViews();
-        
-        // 🛠️ Filter results by current user's seller ID
+
+        // Filter results by current user's seller ID
         Cursor cursor = dbHelper.getItemDistributionCountBySeller(currentUserId);
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -123,11 +130,11 @@ public class AnalyticsActivity extends AppCompatActivity {
         List<Integer> colors = new ArrayList<>();
 
         int[] chartPalette = {
-                Color.parseColor("#0061A4"), 
-                Color.parseColor("#34A853"), 
-                Color.parseColor("#FBBC05"), 
-                Color.parseColor("#EA4335"), 
-                Color.parseColor("#8E44AD")  
+                Color.parseColor("#0061A4"),
+                Color.parseColor("#34A853"),
+                Color.parseColor("#FBBC05"),
+                Color.parseColor("#EA4335"),
+                Color.parseColor("#8E44AD")
         };
 
         int colorIndex = 0;
@@ -162,14 +169,16 @@ public class AnalyticsActivity extends AppCompatActivity {
         }
         cursor.close();
 
-        pieChartView.setData(values, colors);
+        if (pieChartView != null) {
+            pieChartView.setData(values, colors);
+        }
     }
 
     private void renderItemPerformance() {
         if (layoutItemPerformance == null) return;
         layoutItemPerformance.removeAllViews();
 
-        // 🛠️ Fetch clicks for each individual item owned by this user
+        // Fetch clicks for each individual item owned by this user
         Cursor cursor = dbHelper.getItemPerformanceDataBySeller(currentUserId);
 
         if (cursor == null || cursor.getCount() == 0) {
@@ -181,15 +190,18 @@ public class AnalyticsActivity extends AppCompatActivity {
             String itemTitle = cursor.getString(0);
             int clicks = cursor.getInt(1);
 
-            // 🛠️ FIXED: Pass layoutItemPerformance as parent to ensure correct LayoutParams resolution
             View itemView = getLayoutInflater().inflate(android.R.layout.simple_list_item_2, layoutItemPerformance, false);
             TextView text1 = itemView.findViewById(android.R.id.text1);
             TextView text2 = itemView.findViewById(android.R.id.text2);
 
-            text1.setText(itemTitle);
-            text1.setTextColor(Color.WHITE);
-            text2.setText(clicks + " WhatsApp clicks");
-            text2.setTextColor(Color.parseColor("#9CA3AF"));
+            if (text1 != null) {
+                text1.setText(itemTitle);
+                text1.setTextColor(Color.WHITE);
+            }
+            if (text2 != null) {
+                text2.setText(clicks + " WhatsApp clicks");
+                text2.setTextColor(Color.parseColor("#9CA3AF"));
+            }
 
             layoutItemPerformance.addView(itemView);
         }

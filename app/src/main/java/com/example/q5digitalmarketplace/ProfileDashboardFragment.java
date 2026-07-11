@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -119,6 +120,7 @@ public class ProfileDashboardFragment extends Fragment {
 
     private void loadProfileData() {
         String loggedInEmail = null;
+        Context context = getContext();
 
         // Read directly from the persistent file instead of a fragile intent string
         if (getActivity() != null) {
@@ -139,25 +141,33 @@ public class ProfileDashboardFragment extends Fragment {
                 tvName.setText(name);
                 tvEmail.setText(email);
 
-                // 🛠️ DYNAMIC SMART EXTRACTION: Handle both plain resource string names and content path URIs smoothly
-                if (imagePath != null && !imagePath.trim().isEmpty()) {
-                    Context context = getContext();
-                    int resId = 0;
-                    if (context != null) {
-                        resId = context.getResources().getIdentifier(imagePath, "drawable", context.getPackageName());
-                    }
+                // 🛠️ SMART MULTI-FORMAT IMAGE ENGINE RESOLVER GATES APPLIED HERE
+                if (imagePath != null && !imagePath.trim().isEmpty() && context != null) {
+                    String cleanImg = imagePath.trim();
+                    try {
+                        // Check if the image string is a local application drawable asset identifier
+                        int resId = context.getResources().getIdentifier(cleanImg, "drawable", context.getPackageName());
 
-                    if (resId != 0) {
-                        // The string matches a static asset matching your profile images list
-                        imgAvatar.setImageResource(resId);
-                    } else {
-                        // The string points to an external device file resource picked via standard crop intents
-                        imgAvatar.setImageURI(Uri.parse(imagePath));
+                        if (resId != 0) {
+                            imgAvatar.setImageResource(resId);
+                        } else {
+                            // Otherwise, fallback parsing out as standard phone system capture URIs
+                            imgAvatar.setImageURI(Uri.parse(cleanImg));
+                        }
+
+                        // Switch visibility states explicitly to display image frame layer
+                        imgAvatar.setVisibility(View.VISIBLE);
+                        if (tvInitial != null) tvInitial.setVisibility(View.GONE);
+
+                    } catch (Exception e) {
+                        // Safe fallback inside nested exceptions to show first letter badge
+                        if (name != null && !name.isEmpty() && tvInitial != null) {
+                            tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
+                            imgAvatar.setVisibility(View.GONE);
+                            tvInitial.setVisibility(View.VISIBLE);
+                        }
                     }
-                    imgAvatar.setVisibility(View.VISIBLE);
-                    if (tvInitial != null) tvInitial.setVisibility(View.GONE);
                 } else if (name != null && !name.isEmpty() && tvInitial != null) {
-                    // Fallback to text initials format if image path string is completely null
                     tvInitial.setText(String.valueOf(name.charAt(0)).toUpperCase());
                     imgAvatar.setVisibility(View.GONE);
                     tvInitial.setVisibility(View.VISIBLE);
@@ -168,9 +178,9 @@ public class ProfileDashboardFragment extends Fragment {
                 String username = dbHelper.getUserNameByEmail(loggedInEmail);
                 tvName.setText(username);
                 tvEmail.setText(loggedInEmail);
-                if (imgAvatar != null) imgAvatar.setVisibility(View.GONE);
                 if (username != null && !username.isEmpty() && tvInitial != null) {
                     tvInitial.setText(String.valueOf(username.charAt(0)).toUpperCase());
+                    imgAvatar.setVisibility(View.GONE);
                     tvInitial.setVisibility(View.VISIBLE);
                 }
             }
@@ -194,11 +204,6 @@ public class ProfileDashboardFragment extends Fragment {
             tvEmail.setText("Not signed in");
             tvListings.setText("0");
             tvFavourites.setText("0");
-            if (imgAvatar != null) imgAvatar.setVisibility(View.GONE);
-            if (tvInitial != null) {
-                tvInitial.setText("G");
-                tvInitial.setVisibility(View.VISIBLE);
-            }
             if (llAnalyticsSection != null) {
                 llAnalyticsSection.setVisibility(View.GONE);
             }

@@ -1,22 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 🛠️ FIXED: Added android:fitsSystemWindows="true" to create the dark status bar spacing layer -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#121212"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:fitsSystemWindows="true">
 
-    <androidx.cardview.widget.CardView
+    <!-- Synchronized Title Bar Header -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="#1E1E2A"
         app:cardCornerRadius="0dp"
-        app:cardElevation="4dp">
+        app:cardElevation="4dp"
+        app:strokeWidth="0dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="80dp"
             android:paddingHorizontal="20dp">
+
+            <ImageView
+                android:id="@+id/btn_back_favorites"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_revert"
+                app:tint="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true"
+                android:contentDescription="Back Navigation Button" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -27,13 +44,48 @@
                 android:textSize="22sp"
                 android:textStyle="bold" />
         </RelativeLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_favorite_items"
+    <!-- Wishlist Viewport Framework Container Parent -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:padding="12dp"
-        android:overScrollMode="never" />
+        android:padding="12dp">
+
+        <!-- Active Favorites RecyclerView Grid List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_favorite_items"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:overScrollMode="never" />
+
+        <!-- Empty State Placeholder UI -->
+        <LinearLayout
+            android:id="@+id/layout_empty_favorites"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your Wishlist is empty"
+                android:textColor="#9CA3AF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Tap the heart icon on marketplace products to populate this list."
+                android:textColor="#6B7280"
+                android:textSize="13sp"
+                android:gravity="center" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

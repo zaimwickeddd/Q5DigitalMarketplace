@@ -1,5 +1,6 @@
 package com.example.q5digitalmarketplace;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -14,7 +15,6 @@ import java.util.List;
 
 public class MyListingsAdapter extends RecyclerView.Adapter<MyListingsAdapter.ViewHolder> {
 
-    // MODIFIED: Removed 'final' so this reference can be dynamically updated by searches
     private List<Listing> itemsList;
     private final ListingAdapter.OnListingActionListener listener;
 
@@ -26,20 +26,37 @@ public class MyListingsAdapter extends RecyclerView.Adapter<MyListingsAdapter.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_my_listing_card, parent, false);
+        // 🛠️ FIXED: Inflates the correct XML layout file
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_my_listing, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Listing listing = itemsList.get(position);
-        holder.tvTitle.setText(listing.getTitle());
-        holder.tvPrice.setText(listing.getPrice());
+        Context context = holder.itemView.getContext();
 
-        // Handle image loading
-        if (listing.getImagePath() != null && !listing.getImagePath().isEmpty()) {
+        holder.tvTitle.setText(listing.getTitle());
+
+        // Ensure price formatting matches the currency display pattern
+        String rawPrice = listing.getPrice();
+        if (rawPrice != null && !rawPrice.trim().toUpperCase().startsWith("RM")) {
+            holder.tvPrice.setText("RM " + rawPrice.trim());
+        } else {
+            holder.tvPrice.setText(rawPrice);
+        }
+
+        // 🛠️ PROBLEM 2 FIXED: Smart Image Resource Parser applied to thumbnails
+        String imgPath = listing.getImagePath();
+        if (imgPath != null && !imgPath.trim().isEmpty()) {
+            String cleanImg = imgPath.trim();
             try {
-                holder.imgPreview.setImageURI(Uri.parse(listing.getImagePath()));
+                int resId = context.getResources().getIdentifier(cleanImg, "drawable", context.getPackageName());
+                if (resId != 0) {
+                    holder.imgPreview.setImageResource(resId);
+                } else {
+                    holder.imgPreview.setImageURI(Uri.parse(cleanImg));
+                }
             } catch (Exception e) {
                 holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
             }
@@ -47,27 +64,29 @@ public class MyListingsAdapter extends RecyclerView.Adapter<MyListingsAdapter.Vi
             holder.imgPreview.setImageResource(android.R.drawable.ic_menu_gallery);
         }
 
-        // Professional Sold UI Logic Application
+        // 🛠️ PROBLEM 1 & 3 FIXED: Apply sold layout configurations and block modifications
         if ("Sold".equalsIgnoreCase(listing.getStatus())) {
-            // 1. Reveal the dark overlay badge on top of the thumbnail
             holder.tvSoldBadge.setVisibility(View.VISIBLE);
 
-            // 2. Hide the mark-sold checkmark icon completely to unclutter the UI
+            // Hide BOTH operational status update buttons when item is checked out
             holder.btnMarkSold.setVisibility(View.GONE);
+            holder.btnEdit.setVisibility(View.GONE);
 
-            // 3. Mutate colors to gray out the item text fields
-            holder.tvTitle.setTextColor(Color.parseColor("#94A3B8"));
-            holder.tvPrice.setTextColor(Color.parseColor("#94A3B8"));
+            // High contrast muted gray text for sold entries against dark surfaces
+            holder.tvTitle.setTextColor(Color.parseColor("#6B7280"));
+            holder.tvPrice.setTextColor(Color.parseColor("#6B7280"));
         } else {
-            // RESET layout state back to active defaults for regular listings
             holder.tvSoldBadge.setVisibility(View.GONE);
-            holder.btnMarkSold.setVisibility(View.VISIBLE);
 
-            holder.tvTitle.setTextColor(Color.parseColor("#1E293B")); // Dark Slate
-            holder.tvPrice.setTextColor(Color.parseColor("#2563EB")); // Vibrant Blue
+            // Re-reveal management option controls for active product entries
+            holder.btnMarkSold.setVisibility(View.VISIBLE);
+            holder.btnEdit.setVisibility(View.VISIBLE);
+
+            // Radiant high contrast titles and prices matching primary dashboard themes
+            holder.tvTitle.setTextColor(Color.parseColor("#F9FAFB"));
+            holder.tvPrice.setTextColor(Color.parseColor("#06B6D4"));
         }
 
-        // Setup Button Listeners
         holder.btnEdit.setOnClickListener(v -> listener.onEdit(listing));
         holder.btnDelete.setOnClickListener(v -> listener.onDelete(listing));
         holder.btnMarkSold.setOnClickListener(v -> listener.onMarkSold(listing));
@@ -76,7 +95,6 @@ public class MyListingsAdapter extends RecyclerView.Adapter<MyListingsAdapter.Vi
     @Override
     public int getItemCount() { return itemsList.size(); }
 
-    // ADDED: Updates the internal data set when filtering via the search bar
     public void updateList(List<Listing> newList) {
         this.itemsList = newList;
         notifyDataSetChanged();
